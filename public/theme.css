@@ -1,3 +1,6 @@
+:root {
+    --font-size: 1rem;
+}
 @font-face {
     font-family: "os_sbold";
     src: url("/assets/os_sbold.woff2") format("woff2");
@@ -24,7 +27,7 @@ body {
     background-color: #111;
     display: flex;
     gap: 1rem;
-    font-size: 1.5rem;
+    font-size: var(--font-size);
     font-family: "os_sbold";
     font-weight: 500;
     color: #fffd;
@@ -138,8 +141,12 @@ body {
     display: flex;
     align-items: center;
     border-radius: .5rem;
-    justify-content: space-around;
+    justify-content: center;
     text-align: center;
+    overflow: hidden;
+}
+.tile > div {
+    width: 100%;
 }
 
 .list_element_root {
@@ -163,14 +170,17 @@ input {
     width: 100%;
     height: 100%;
     border-radius: .5rem;
-    padding: 0 2rem;
-    font-size: 1.5rem;
+    font-size: var(--font-size);
     font-family: "os_sbold";
     outline: none;
-    transition: all 120ms;
+    padding: 0 2rem;
+    border-color: transparent;
+    transition: border-color 120ms;
 }
 input:focus {
-  box-shadow: 0 0 0 .1rem #888;
+    border: solid .2rem;
+    border-color: #888;
+    padding: 0 1.8rem;
 }
 #config_app_nav_btn {
     background-image: url("/assets/gear.svg");

@@ -61,19 +61,22 @@ class TileConfigGUI {
                     type: "input",
                     placeholder: "Title",
                     on_submit: () => {
-                        document.getElementById("tile_color_input").focus();
+                        document.getElementById("tile_ip_input").focus();
                     }
                 },
             }
         },
         color: {
-            tile_item: {
+            tile_0: {
+                tile_color_text: {
+                    type: "text",
+                    text: "Color",
+                    backgroundColor: "#333"
+                },
+            },
+            tile_1: {
                 tile_color_input: {
-                    type: "input",
-                    placeholder: "Color (HEX)",
-                    on_submit: () => {
-                        document.getElementById("tile_ip_input").focus();
-                    }
+                    type: "color"
                 },
             }
         },
@@ -126,7 +129,10 @@ class TileConfigGUI {
     static update() {
         let tile_instance = PresetsMgr.selected_preset.tiles[TilesGUI.selected_tile_id];
         document.getElementById("tile_title_input").value = tile_instance.title;
+
         document.getElementById("tile_color_input").value = tile_instance.color;
+        document.getElementById("tile_color_input").parentElement.style.backgroundColor = tile_instance.color;
+
         document.getElementById("tile_ip_input").value = tile_instance.ip;
         document.getElementById("tile_cmd_input").value = tile_instance.cmd;
     }
@@ -203,6 +209,13 @@ class TilesGUI {
         tile.innerHTML = tile_data.title;
         tile.style.backgroundColor = tile_data.color;
 
+        let color = App.hexToRgb(tile_data.color);
+        console.log(tile_data.color, color);
+        let brightness = Math.round(.001 * (299*color.r + 587*color.g + 114*color.b));
+
+        // calc text color to make it readable for most tile colors
+        tile.style.color = (brightness > 125) ? "black" : "white";
+
         tiles.insertBefore(tile, document.getElementById("add_tile_btn"));
 
         tile.onclick = () => {
@@ -240,9 +253,6 @@ class TilesGUI {
         let x = localStorage.getItem("grid_x");
         let y = localStorage.getItem("grid_y");
 
-        document.getElementById("col_count_text").innerHTML = x;
-        document.getElementById("row_count_text").innerHTML = y;
-
         tiles.style.gridTemplateRows = "";
         tiles.style.gridTemplateColumns = "";
 
@@ -253,6 +263,7 @@ class TilesGUI {
             tiles.style.gridTemplateColumns += " 1fr";
         }
 
+        AppConfigGUI.update();
         TilesGUI.drawPage();
     }
 
@@ -673,6 +684,7 @@ class AppGUI {
         document.body.style.width = layout_state == 1 ? "100vw" : "calc(100vw - 1rem)";
         document.body.style.height = layout_state == 1 ? "calc(100dvh - 1rem)" : "100dvh";
         document.body.style.minHeight = layout_state == 1 ? "calc(100dvh - 1rem)" : "100dvh";
+        document.documentElement.setAttribute("style", `--font-size: ${localStorage.getItem("font_size") / 10}rem`);
     }
 
     static showGridGUI(...elements) {
@@ -748,6 +760,11 @@ class StorageMgr {
             localStorage.setItem("layout_state", 0);
             AppGUI.updateLayout();
         }
+
+        if (!localStorage.getItem("font_size")) {
+            localStorage.setItem("font_size", 15);
+            AppGUI.updateLayout();
+        }
     }
 
     static addRow() {
@@ -783,6 +800,36 @@ class StorageMgr {
     static switchLayout() {
         // true - vertical, false - horizontal
         localStorage.setItem("layout_state", localStorage.getItem("layout_state") == 1 ? 0 : 1);
+        AppConfigGUI.update();
+        AppGUI.updateLayout();
+    }
+
+    static increaseFontSize() {
+        let old_size = parseInt(localStorage.getItem("font_size"));
+        if (old_size < 10) {
+            localStorage.setItem("font_size", 10);
+        }
+        else if (old_size < 15) {
+            localStorage.setItem("font_size", 15);
+        }
+        else if (old_size < 20) {
+            localStorage.setItem("font_size", 20);
+        }
+        
+        AppConfigGUI.update();
+        AppGUI.updateLayout();
+    }
+    static decreaseFontSize() {
+        let old_size = parseInt(localStorage.getItem("font_size"));
+        if (old_size > 20) {
+            localStorage.setItem("font_size", 20);
+        }
+        else if (old_size > 15) {
+            localStorage.setItem("font_size", 15);
+        }
+        else if (old_size > 10) {
+            localStorage.setItem("font_size", 10);
+        }
         AppConfigGUI.update();
         AppGUI.updateLayout();
     }
@@ -838,7 +885,8 @@ class AppConfigGUI {
                 },
                 row_count_text: {
                     type: "text",
-                    text: "0"
+                    text: "0",
+                    bold: true
                 },
                 add_row_btn: {
                     type: "btn",
@@ -864,12 +912,39 @@ class AppConfigGUI {
                 },
                 col_count_text: {
                     type: "text",
-                    text: "0"
+                    text: "0",
+                    bold: true
                 },
                 add_col_btn: {
                     type: "btn",
                     icon: "/assets/arrow_r.svg",
                     on_click: StorageMgr.addColumn
+                },
+            }
+        },
+        font_size: {
+            tile_title: {
+                rows_title: {
+                    type: "text",
+                    text: "Font Size",
+                    backgroundColor: "#333"
+                },
+            },
+            tile_items: {
+                red_font_size_btn: {
+                    type: "btn",
+                    icon: "/assets/arrow_l.svg",
+                    on_click: StorageMgr.decreaseFontSize
+                },
+                font_size_text: {
+                    type: "text",
+                    text: "0",
+                    bold: true
+                },
+                inc_font_size_btn: {
+                    type: "btn",
+                    icon: "/assets/arrow_r.svg",
+                    on_click: StorageMgr.increaseFontSize
                 },
             }
         },
@@ -932,10 +1007,23 @@ class AppConfigGUI {
         layout_state_btn.innerHTML = layout_state == 1 ? "Vertical" : "Horizontal";
         layout_state_btn.parentElement.style.backgroundColor = layout_state == 1 ? "#b83" : "#648";
 
-        document.getElementById("col_count_text").value = localStorage.getItem("grid_x");
-        document.getElementById("row_count_text").value = localStorage.getItem("grid_y");
+        document.getElementById("col_count_text").innerHTML = localStorage.getItem("grid_x");
+        document.getElementById("row_count_text").innerHTML = localStorage.getItem("grid_y");
 
-        chunk_id_input.value = localStorage.getItem("chunk_id");
+        let font_size_text = document.getElementById("font_size_text");
+        let font_size = parseInt(localStorage.getItem("font_size"));
+
+        if (font_size <= 10) {
+           font_size_text.innerHTML = "S";
+        }
+        else if (font_size <= 15) {
+           font_size_text.innerHTML = "M";
+        }
+        else if (font_size <= 20) {
+           font_size_text.innerHTML = "L";
+        }
+        
+        document.getElementById("chunk_id_input").value = localStorage.getItem("chunk_id");
     }
 }
 
@@ -970,6 +1058,10 @@ class LayoutBuilder {
                         if (item.backgroundColor) {
                             tile_element.style.backgroundColor = item.backgroundColor;
                         }
+
+                        if (item.bold) {
+                            tile_element.style.fontFamily = "os_bold";
+                        }
                     }
 
                     if (item.type == "input") {
@@ -983,6 +1075,25 @@ class LayoutBuilder {
                             if (item.on_submit && ev.key === "Enter" && !ev.isComposing) {
                                 item.on_submit(ev);
                             }
+                        }
+                    }
+                    
+                    if (item.type == "color") {
+                        let color_element = document.createElement("input");
+                        color_element.id = item_key;
+                        color_element.type = "color";
+                        tile_element.appendChild(color_element);
+                        color_element.style.display = "none";
+
+                        tile_element.onclick = () => {
+                            color_element.click();
+                        }
+
+                        color_element.onchange = (ev) => {
+                            if (item.on_submit) {
+                                item.on_submit(ev);
+                            }
+                            tile_element.style.backgroundColor = color_element.value;
                         }
                     }
 
@@ -1123,11 +1234,32 @@ class DDVManager {
 }
 
 class App {
+    /** Checks some names (ids) to have proper name to be sent to the server.
+     *  Server has the same check so it's just a time saver to reduce server requests.
+     */
     static validateName(id) {
         if (!id || id.toString() == "") return false;
 
         let chars = /[`!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
         return !chars.test(id);
+    }
+
+    /** #ff00ff => (255, 0, 255) */
+    static hexToRgb(hex) {
+        let result;
+
+        if (hex.length == 4) {
+            result = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
+        }
+        if (hex.length == 7) {
+            result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        }
+        
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
     }
 
     static init() {
