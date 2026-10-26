@@ -10,28 +10,26 @@ Server-side is written in `nodejs`. You need to install it first. Then run these
 
 ```
 sudo npm install --global babel-minify
-chmod +x ./start.sh
+chmod +x ./rebuild.sh
 ```
 
 > [!CAUTION]
 > Before running server open `config.json` and setup the path to a local database. This path will be used by server to store all ddv layout presets!
 
-After setting up database path in `config.json`, to start server run this in terminal:
+After setting up a database path in `config.json` start the server by running in terminal:
 
 ```
-./start.sh
+./rebuild.sh
 ```
 
 Script should bundle client code and run server on defined arrangements.
 
-### Usage without `npm`
+### Usage without `npm` deps
 
-Rename `client.js` to `bundle.js` and move file into `/public` directory by replacing original `bundle.js` file.
-
-Run server as:
+If you do not plan to modify code base - run in project's root directory:
 
 ```
 node server.js
 ```
 
-In this case you will be able to modify client code without restarting the server every time, but such approach increases production page load time. You still need to define database directory in `config.json` before use.
+**You still need to define database directory in `config.json` before running the server!**

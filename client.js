@@ -59,7 +59,10 @@ class TileConfigGUI {
             tile_item: {
                 tile_title_input: {
                     type: "input",
-                    placeholder: "Title"
+                    placeholder: "Title",
+                    on_submit: () => {
+                        document.getElementById("tile_color_input").focus();
+                    }
                 },
             }
         },
@@ -67,7 +70,10 @@ class TileConfigGUI {
             tile_item: {
                 tile_color_input: {
                     type: "input",
-                    placeholder: "Color (HEX)"
+                    placeholder: "Color (HEX)",
+                    on_submit: () => {
+                        document.getElementById("tile_ip_input").focus();
+                    }
                 },
             }
         },
@@ -75,7 +81,10 @@ class TileConfigGUI {
             tile_item: {
                 tile_ip_input: {
                     type: "input",
-                    placeholder: "DDV address (IP)"
+                    placeholder: "DDV address (IP)",
+                    on_submit: () => {
+                        document.getElementById("tile_cmd_input").focus();
+                    }
                 },
             }
         },
@@ -83,7 +92,11 @@ class TileConfigGUI {
             tile_item: {
                 tile_cmd_input: {
                     type: "input",
-                    placeholder: "DDV command (!cmd)"
+                    placeholder: "DDV command (!cmd)",
+                    on_submit: () => {
+                        document.getElementById("tile_cmd_input").blur();
+                        config_tile.scrollBy(0, config_tile.scrollHeight);
+                    }
                 },
             }
         },
@@ -426,7 +439,10 @@ class PresetConfigGUI {
             item: {
                 preset_name_input: {
                     type: "input",
-                    placeholder: "Preset name"
+                    placeholder: "Preset name",
+                    on_submit: () => {
+                        document.getElementById("preset_name_input").blur();
+                    }
                 },
             }
         },
@@ -647,7 +663,8 @@ class AppGUI {
         document.getElementById("area_A_navbar").style.flexDirection = layout_state == 1 ? "column" : "row";
         document.body.style.flexDirection = layout_state == 1 ? "column" : "row";
         document.body.style.width = layout_state == 1 ? "100vw" : "calc(100vw - 1rem)";
-        document.body.style.height = layout_state == 1 ? "calc(100vh - 1rem)" : "100vh";
+        document.body.style.height = layout_state == 1 ? "calc(100dvh - 1rem)" : "100dvh";
+        document.body.style.minHeight = layout_state == 1 ? "calc(100dvh - 1rem)" : "100dvh";
     }
 
     static showGridGUI(...elements) {
@@ -662,6 +679,7 @@ class AppGUI {
 
             if (elements[i] == config_app) {
                 config_app_nav_btn.style.backgroundImage = `url("/assets/cross.svg")`;
+                AnimationMgr.stop(chunk_id_input, "error_impact");
             }
             if (elements[i] == presets) {
                 presets_nav_btn.style.backgroundImage = `url("/assets/cross.svg")`;
@@ -768,7 +786,14 @@ class AppConfigMgr {
 
     /** updates chunk id local storage value and fetches presets data right after. */
     static syncChunkID() {
-        localStorage.setItem("chunk_id", document.getElementById("chunk_id_input").value);
+        let chunk_id_input = document.getElementById("chunk_id_input");
+        if (chunk_id_input.value == "") {
+            AnimationMgr.stop(chunk_id_input, "error_impact");
+            AnimationMgr.play(chunk_id_input, "error_impact");
+            return;
+        }
+
+        localStorage.setItem("chunk_id", chunk_id_input.value);
         localStorage.removeItem("preset_id");
 
         PresetsGUI.clearPresets();
@@ -860,7 +885,10 @@ class AppConfigGUI {
             tile_item: {
                 chunk_id_input: {
                     type: "input",
-                    placeholder: "Chunk ID"
+                    placeholder: "Chunk ID",
+                    on_submit: () => {
+                        document.getElementById("chunk_id_input").blur();
+                    }
                 },
             }
         },
@@ -879,7 +907,7 @@ class AppConfigGUI {
                     type: "btn",
                     input_to_tile: true,
                     // icon: "/assets/refresh.svg",
-                    text: "Sync Chunk",
+                    text: "Sync",
                     outlined: true,
                     color: "#FD6",
                     on_click: AppConfigMgr.syncChunkID
@@ -942,6 +970,11 @@ class LayoutBuilder {
                         input_element.placeholder = item.placeholder;
                         list_element_root.style.gridTemplateColumns = "1fr";
                         tile_element.appendChild(input_element);
+                        input_element.onkeyup = (ev) => {
+                            if (item.on_submit && ev.key === "Enter" && !ev.isComposing) {
+                                item.on_submit(ev);
+                            }
+                        }
                     }
 
                     if (item.type == "btn") {
@@ -1009,6 +1042,7 @@ class LogsGUI {
         logs.scrollBy(0, logs.scrollHeight);
     }
     static printResMessage(ip, message) {
+        message = message.replace(/\n/g, ''); // remove new line in the end if exist (ddv sends it in response)
         logs.innerHTML += `<span style="color:#9F6">[${this.getTime()} RES ${ip}]</span>${message}\n`;
         logs.scrollBy(0, logs.scrollHeight);
     }

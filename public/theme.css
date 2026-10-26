@@ -19,9 +19,8 @@
 body {
     box-sizing: border-box;
     margin: 0;
-    width: 100vw;
-    height: 100vh;
     overflow: hidden;
+    scrollbar-width: none;
     background-color: #111;
     display: flex;
     gap: 1rem;
@@ -31,6 +30,7 @@ body {
     color: #fffd;
     user-select: none;
 }
+
 @keyframes wiggle {
     0% {
         transform: rotate(1deg);
@@ -45,6 +45,7 @@ body {
 .wiggle {
     animation: wiggle 220ms infinite ease-in-out;
 }
+
 #response_indicator {
     box-sizing: border-box;
     position: absolute;
@@ -103,6 +104,11 @@ body {
     overflow-y: scroll;
     scrollbar-width: none;
 }
+
+#config_tile, #presets, #logs {
+    scroll-behavior: smooth;
+}
+
 #tiles {
     box-sizing: border-box;
     display: grid;
@@ -195,33 +201,42 @@ input:focus {
     box-sizing: border-box;
     white-space: pre-line;
     gap: 0;
-    scroll-behavior: smooth;
     font-family: "mononoki_bold";
 }
 #logs:empty::after {
-    content: "NO LOGS";
+    content: "> Your logs goes here...";
     height: 100%;
     overflow: hidden;
     animation: text-blink 1s ease-in-out infinite;
-}
-#presets {
-    scroll-behavior: smooth;
 }
 #presets:empty {
     display: flex;
 }
 #presets:empty::after {
-    content: "Invalid Chunk ID";
+    content: "Waiting for chunk data...";
     height: 100%;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
     opacity: .5;
+    animation: text-blink 1s ease-in-out infinite;
 }
 
 @keyframes text-blink {
     0% { opacity: .25; }
     50% { opacity: .5; }
     to { opacity: .25; }
+}
+
+.error_impact {
+    animation: error_impact 220ms ease-out forwards;
+}
+@keyframes error_impact {
+    from {
+        filter: invert(30%);
+    }
+    to {
+        filter: invert(0%);
+    }
 }
