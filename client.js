@@ -472,18 +472,25 @@ class PresetConfigGUI {
     }
 
     static saveSelectedPresetName() {
+        let preset_name_input = document.getElementById("preset_name_input");
+        if (!App.validateName(preset_name_input.value)) {
+            AnimationMgr.stop(preset_name_input, "error_impact");
+            AnimationMgr.play(preset_name_input, "error_impact");
+            return;
+        }
+
         fetch(`/update_preset_name`, {
             method: "POST", 
             body: JSON.stringify({
                 chunk_id: localStorage.getItem("chunk_id"),
                 preset_id: localStorage.getItem("preset_id"),
-                data: document.getElementById("preset_name_input").value
+                data: preset_name_input.value
             })
         })
         .then(res => {
             if (res.ok) {
                 AppGUI.showResponseIndicator();
-                localStorage.setItem("preset_id", document.getElementById("preset_name_input").value);
+                localStorage.setItem("preset_id", preset_name_input.value);
 
                 AppGUI.hideGUI(config_preset);
                 AppGUI.showGridGUI(tiles);
@@ -680,7 +687,7 @@ class AppGUI {
 
             if (elements[i] == config_app) {
                 config_app_nav_btn.style.backgroundImage = `url("/assets/cross.svg")`;
-                AnimationMgr.stop(chunk_id_input, "error_impact");
+                AnimationMgr.stop(document.getElementById("chunk_id_input"), "error_impact");
             }
             if (elements[i] == presets) {
                 presets_nav_btn.style.backgroundImage = `url("/assets/cross.svg")`;
@@ -690,6 +697,7 @@ class AppGUI {
             }
             if (elements[i] == config_preset) {
                 document.getElementById("area_A_navbar").style.display = "none";
+                AnimationMgr.stop(document.getElementById("preset_name_input"), "error_impact");
             }
         }
     }
@@ -785,17 +793,10 @@ class AppConfigMgr {
         return (Math.random() + 1).toString(16).substring(2);
     }
 
-    static checkChunkId(id) {
-        if (!id || id.toString() == "") return false;
-
-        let chars = /[`!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
-        return !chars.test(id);
-    }
-
     /** updates chunk id local storage value and fetches presets data right after. */
     static syncChunkID() {
         let chunk_id_input = document.getElementById("chunk_id_input");
-        if (!AppConfigMgr.checkChunkId(chunk_id_input.value)) {
+        if (!App.validateName(chunk_id_input.value)) {
             AnimationMgr.stop(chunk_id_input, "error_impact");
             AnimationMgr.play(chunk_id_input, "error_impact");
             return;
@@ -1088,12 +1089,13 @@ class DDVManager {
         let failed = false;
 
         if (!this.validateIP(ip)) {
-            LogsGUI.printMessage("IP Address is invalid. Valid example: '192.168.88.128'");
+            LogsGUI.printMessage("IP address is invalid. Example: '192.168.88.128'");
+            LogsGUI.printMessage("Tip: To edit tile data - hold it for a while!");
             return result;
         }
 
         if (!this.validateCmd(cmd)) {
-            LogsGUI.printMessage("Tile command is invalid. Valid example: '!my_command'");
+            LogsGUI.printMessage("Command is invalid. Example: '!my_command'");
             return result;
         }
 
@@ -1121,6 +1123,13 @@ class DDVManager {
 }
 
 class App {
+    static validateName(id) {
+        if (!id || id.toString() == "") return false;
+
+        let chars = /[`!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
+        return !chars.test(id);
+    }
+
     static init() {
         LayoutBuilder.createLayoutItems(AppConfigGUI.config_items, config_app);
         LayoutBuilder.createLayoutItems(TileConfigGUI.config_items, config_tile);

@@ -120,7 +120,7 @@ body {
     grid-template-rows: 1fr !important;
 }
 #tiles:empty::after {
-    content: "Create or select preset to work with tiles here...";
+    content: "No preset selected";
     display: flex;
     height: 100%;
     width: 100%;
@@ -204,7 +204,7 @@ input:focus {
     font-family: "mononoki_bold";
 }
 #logs:empty::after {
-    content: "> Your logs goes here...";
+    content: "Your logs goes here...";
     height: 100%;
     overflow: hidden;
     animation: text-blink 1s ease-in-out infinite;
