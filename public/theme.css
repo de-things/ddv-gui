@@ -1,0 +1,227 @@
+@font-face {
+    font-family: "os_sbold";
+    src: url("/assets/os_sbold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+}
+@font-face {
+    font-family: "os_bold";
+    src: url("/assets/os_bold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+}
+@font-face {
+    font-family: "mononoki_bold";
+    src: url("/assets/mononoki_bold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+}
+body {
+    box-sizing: border-box;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #111;
+    display: flex;
+    gap: 1rem;
+    font-size: 1.5rem;
+    font-family: "os_sbold";
+    font-weight: 500;
+    color: #fffd;
+    user-select: none;
+}
+@keyframes wiggle {
+    0% {
+        transform: rotate(1deg);
+    }
+    50% {
+        transform: rotate(-1deg);
+    }
+    100% {
+        transform: rotate(1deg);
+    }
+}
+.wiggle {
+    animation: wiggle 220ms infinite ease-in-out;
+}
+#response_indicator {
+    box-sizing: border-box;
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    pointer-events: none;
+
+    right: 1rem;
+    bottom: 1rem;
+
+    border-radius: 1rem;
+
+    z-index: 1;
+
+    opacity: 0;
+
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 1rem;
+}
+.stretch {
+    width: 100%; height: 100%;
+}
+
+.basic_item {
+    width: 100%;
+    height: 4rem;
+    min-height: 4rem;
+    background-color: #444;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: .5rem;
+    gap: 1rem;
+}
+.basic_item_icon {
+    background-repeat: no-repeat;
+    background-size: 1.5rem;
+    background-position: center;
+}
+
+.area {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    background-color: #222;
+    border: solid #444 .25rem;
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0rem;
+    min-height: 0rem;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+#tiles {
+    box-sizing: border-box;
+    display: grid;
+    gap: 1rem;
+}
+#tiles:empty {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr !important;
+}
+#tiles:empty::after {
+    content: "Create or select preset to work with tiles here...";
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+    opacity: .5;
+    align-items: center;
+    justify-content: center;
+}
+.tile {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    background-color: #444;
+    display: flex;
+    align-items: center;
+    border-radius: .5rem;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.list_element_root {
+    background-color: unset;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 1fr;
+}
+.btn_icon {
+    width: 3rem;
+    height: 3rem;
+    background-repeat: no-repeat;
+    background-size: 1.5rem;
+    background-position: center;
+}
+input {
+    box-sizing: border-box;
+    background-color: #111;
+    color: #fffd;
+    border: none;
+    width: 100%;
+    height: 100%;
+    border-radius: .5rem;
+    padding: 0 2rem;
+    font-size: 1.5rem;
+    font-family: "os_sbold";
+    outline: none;
+    transition: all 120ms;
+}
+input:focus {
+  box-shadow: 0 0 0 .1rem #888;
+}
+#config_app_nav_btn {
+    background-image: url("/assets/gear.svg");
+}
+#presets_nav_btn {
+    background-image: url("/assets/presets.svg");
+}
+#add_tile_btn {
+    box-sizing: border-box;
+    background-color: #222;
+    border: .25rem solid #444;
+}
+#add_preset_btn {
+    box-sizing: border-box;
+    background-color: #222;
+    border: .25rem solid #444;
+}
+
+.tile_btn {
+    transition: all 120ms;
+    font-family: "os_bold";
+}
+.tile_btn:active {
+    filter: invert(10%);
+    transform: scale(99%);
+}
+#logs {
+    box-sizing: border-box;
+    white-space: pre-line;
+    gap: 0;
+    scroll-behavior: smooth;
+    font-family: "mononoki_bold";
+}
+#logs:empty::after {
+    content: "NO LOGS";
+    height: 100%;
+    overflow: hidden;
+    animation: text-blink 1s ease-in-out infinite;
+}
+#presets {
+    scroll-behavior: smooth;
+}
+#presets:empty {
+    display: flex;
+}
+#presets:empty::after {
+    content: "Invalid Chunk ID";
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: .5;
+}
+
+@keyframes text-blink {
+    0% { opacity: .25; }
+    50% { opacity: .5; }
+    to { opacity: .25; }
+}
