@@ -49,7 +49,7 @@ class TileConfigGUI {
                 tile_type_btn: {
                     type: "btn",
                     input_to_tile: true,
-                    text: "DEFAULT",
+                    text: "A",
                     on_click: () => { console.log("todo") }
                 },
             }
@@ -513,6 +513,7 @@ class PresetConfigGUI {
 
                 presets.removeChild(PresetsGUI.selected_preset_element);
                 PresetsGUI.selected_preset_name = null;
+                PresetsMgr.selected_preset = {};
 
                 AppGUI.hideGUI(config_preset);
                 AppGUI.showGridGUI(tiles);
@@ -784,10 +785,17 @@ class AppConfigMgr {
         return (Math.random() + 1).toString(16).substring(2);
     }
 
+    static checkChunkId(id) {
+        if (!id || id.toString() == "") return false;
+
+        let chars = /[`!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
+        return !chars.test(id);
+    }
+
     /** updates chunk id local storage value and fetches presets data right after. */
     static syncChunkID() {
         let chunk_id_input = document.getElementById("chunk_id_input");
-        if (chunk_id_input.value == "") {
+        if (!AppConfigMgr.checkChunkId(chunk_id_input.value)) {
             AnimationMgr.stop(chunk_id_input, "error_impact");
             AnimationMgr.play(chunk_id_input, "error_impact");
             return;
