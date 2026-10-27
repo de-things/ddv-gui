@@ -681,9 +681,9 @@ class AppGUI {
         document.getElementById("area_A").style.flexDirection = layout_state == 1 ? "row" : "column";
         document.getElementById("area_A_navbar").style.flexDirection = layout_state == 1 ? "column" : "row";
         document.body.style.flexDirection = layout_state == 1 ? "column" : "row";
-        document.body.style.width = layout_state == 1 ? "100vw" : "calc(100vw - 1rem)";
-        document.body.style.height = layout_state == 1 ? "calc(100dvh - 1rem)" : "100dvh";
-        document.body.style.minHeight = layout_state == 1 ? "calc(100dvh - 1rem)" : "100dvh";
+        document.body.style.width = layout_state == 1 ? "calc(100vw - 2rem)" : "calc(100vw - 3rem)";
+        document.body.style.height = layout_state == 1 ? "calc(100dvh - 3rem)" : "calc(100dvh - 2rem)";
+        document.body.style.minHeight = layout_state == 1 ? "calc(100dvh - 3rem)" : "calc(100dvh - 2rem)";
         document.documentElement.setAttribute("style", `--font-size: ${localStorage.getItem("font_size") / 10}rem`);
     }
 
@@ -700,14 +700,28 @@ class AppGUI {
             if (elements[i] == config_app) {
                 config_app_nav_btn.style.backgroundImage = `url("/assets/cross.svg")`;
                 AnimationMgr.stop(document.getElementById("chunk_id_input"), "error_impact");
+
+                let add_row_btn_parent = document.getElementById("add_row_btn").parentElement;
+                AnimationMgr.stop(add_row_btn_parent, "translateXp");
+                AnimationMgr.stop(add_row_btn_parent, "translateXn");
+
+                let add_col_btn_parent = document.getElementById("add_col_btn").parentElement;
+                AnimationMgr.stop(add_col_btn_parent, "translateXp");
+                AnimationMgr.stop(add_col_btn_parent, "translateXn");
+
+                let inc_font_size_btn_parent = document.getElementById("inc_font_size_btn").parentElement;
+                AnimationMgr.stop(inc_font_size_btn_parent, "translateXp");
+                AnimationMgr.stop(inc_font_size_btn_parent, "translateXn");
             }
             if (elements[i] == presets) {
                 presets_nav_btn.style.backgroundImage = `url("/assets/cross.svg")`;
             }
             if (elements[i] == config_tile) {
+                config_tile.scrollTo(0, 0); // reset scroll pos
                 document.getElementById("area_A_navbar").style.display = "none";
             }
             if (elements[i] == config_preset) {
+                config_preset.scrollTo(0, 0); // reset scroll pos
                 document.getElementById("area_A_navbar").style.display = "none";
                 AnimationMgr.stop(document.getElementById("preset_name_input"), "error_impact");
             }
@@ -881,7 +895,14 @@ class AppConfigGUI {
                 rem_row_btn: {
                     type: "btn",
                     icon: "/assets/arrow_l.svg",
-                    on_click: StorageMgr.removeRow
+                    on_click: () => {
+                        let parent = document.getElementById("add_row_btn").parentElement;
+                        AnimationMgr.stop(parent, "translateXp");
+                        AnimationMgr.stop(parent, "translateXn");
+                        AnimationMgr.play(parent, "translateXn");
+
+                        StorageMgr.removeRow();
+                    }
                 },
                 row_count_text: {
                     type: "text",
@@ -891,7 +912,13 @@ class AppConfigGUI {
                 add_row_btn: {
                     type: "btn",
                     icon: "/assets/arrow_r.svg",
-                    on_click: StorageMgr.addRow
+                    on_click: () => {
+                        let parent = document.getElementById("add_row_btn").parentElement;
+                        AnimationMgr.stop(parent, "translateXp");
+                        AnimationMgr.stop(parent, "translateXn");
+                        AnimationMgr.play(parent, "translateXp");
+                        StorageMgr.addRow();
+                    }
                 },
             }
             
@@ -908,7 +935,13 @@ class AppConfigGUI {
                 rem_col_btn: {
                     type: "btn",
                     icon: "/assets/arrow_l.svg",
-                    on_click: StorageMgr.removeColumn
+                    on_click: () => {
+                        let parent = document.getElementById("rem_col_btn").parentElement;
+                        AnimationMgr.stop(parent, "translateXp");
+                        AnimationMgr.stop(parent, "translateXn");
+                        AnimationMgr.play(parent, "translateXn");
+                        StorageMgr.removeColumn();
+                    }
                 },
                 col_count_text: {
                     type: "text",
@@ -918,7 +951,13 @@ class AppConfigGUI {
                 add_col_btn: {
                     type: "btn",
                     icon: "/assets/arrow_r.svg",
-                    on_click: StorageMgr.addColumn
+                    on_click: () => {
+                        let parent = document.getElementById("add_col_btn").parentElement;
+                        AnimationMgr.stop(parent, "translateXp");
+                        AnimationMgr.stop(parent, "translateXn");
+                        AnimationMgr.play(parent, "translateXp");
+                        StorageMgr.addColumn();
+                    }
                 },
             }
         },
@@ -926,7 +965,7 @@ class AppConfigGUI {
             tile_title: {
                 rows_title: {
                     type: "text",
-                    text: "Font Size",
+                    text: "Font size",
                     backgroundColor: "#333"
                 },
             },
@@ -934,7 +973,13 @@ class AppConfigGUI {
                 red_font_size_btn: {
                     type: "btn",
                     icon: "/assets/arrow_l.svg",
-                    on_click: StorageMgr.decreaseFontSize
+                    on_click: () => {
+                        let parent = document.getElementById("red_font_size_btn").parentElement;
+                        AnimationMgr.stop(parent, "translateXp");
+                        AnimationMgr.stop(parent, "translateXn");
+                        AnimationMgr.play(parent, "translateXn");
+                        StorageMgr.decreaseFontSize();
+                    }
                 },
                 font_size_text: {
                     type: "text",
@@ -944,7 +989,13 @@ class AppConfigGUI {
                 inc_font_size_btn: {
                     type: "btn",
                     icon: "/assets/arrow_r.svg",
-                    on_click: StorageMgr.increaseFontSize
+                    on_click: () => {
+                        let parent = document.getElementById("inc_font_size_btn").parentElement;
+                        AnimationMgr.stop(parent, "translateXp");
+                        AnimationMgr.stop(parent, "translateXn");
+                        AnimationMgr.play(parent, "translateXp");
+                        StorageMgr.increaseFontSize();
+                    }
                 },
             }
         },

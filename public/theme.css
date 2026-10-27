@@ -21,7 +21,7 @@
 }
 body {
     box-sizing: border-box;
-    margin: 0;
+    margin: 1rem;
     overflow: hidden;
     scrollbar-width: none;
     background-color: #111;
@@ -108,7 +108,7 @@ body {
     scrollbar-width: none;
 }
 
-#config_tile, #presets, #logs {
+#config_app, #config_preset, #config_tile, #presets, #logs {
     scroll-behavior: smooth;
 }
 
@@ -200,8 +200,10 @@ input:focus {
 }
 
 .tile_btn {
+    box-sizing: border-box;
     transition: all 120ms;
     font-family: "os_bold";
+    border: solid #fff1 .25rem;
 }
 .tile_btn:active {
     filter: invert(10%);
@@ -212,9 +214,10 @@ input:focus {
     white-space: pre-line;
     gap: 0;
     font-family: "mononoki_bold";
+    background: linear-gradient(45deg,#0000, #0000, #fff1, #fff1, #0000);
 }
 #logs:empty::after {
-    content: "Your logs goes here...";
+    content: "Nothing to show...";
     height: 100%;
     overflow: hidden;
     animation: text-blink 1s ease-in-out infinite;
@@ -248,5 +251,21 @@ input:focus {
     }
     to {
         filter: invert(0%);
+    }
+}
+.translateXp {
+    animation: translateXp 220ms ease-out forwards;
+}
+.translateXn {
+    animation: translateXn 220ms ease-out forwards;
+}
+@keyframes translateXp {
+    from {
+        transform: translateX(.25rem);
+    }
+}
+@keyframes translateXn {
+    from {
+        transform: translateX(-.25rem);
     }
 }
