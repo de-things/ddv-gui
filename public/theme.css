@@ -144,6 +144,7 @@ body {
     justify-content: center;
     text-align: center;
     overflow: hidden;
+    transition: all 120ms;
 }
 .tile > div {
     width: 100%;
@@ -175,7 +176,7 @@ input {
     outline: none;
     padding: 0 2rem;
     border-color: transparent;
-    transition: border-color 120ms;
+    transition: border-color 120ms, font-size 120ms;
 }
 input:focus {
     border: solid .2rem;
@@ -201,7 +202,6 @@ input:focus {
 
 .tile_btn {
     box-sizing: border-box;
-    transition: all 120ms;
     font-family: "os_bold";
     border: solid #fff1 .25rem;
 }
