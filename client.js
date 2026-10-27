@@ -1241,7 +1241,7 @@ class DDVManager {
         return true;
     }
     static validateCmd(cmd) {
-        return cmd.startsWith("!");
+        return cmd.startsWith("!") && cmd.length > 1;
     }
     /** Sends command request to a ddv. `ip` - dethings device ip address, `cmd` - !command to send. 
      * Returns device response as a plain text.
@@ -1251,13 +1251,15 @@ class DDVManager {
         let failed = false;
 
         if (!this.validateIP(ip)) {
-            LogsGUI.printMessage("IP address is invalid. Example: '192.168.88.128'");
-            LogsGUI.printMessage("Tip: To edit tile data - hold it for a while!");
+            LogsGUI.printMessage("Tile address (IP) is invalid.");
+            LogsGUI.printMessage("Example: '192.168.88.128'.");
+            LogsGUI.printMessage("Tip: Hold tile to edit it's data.");
             return result;
         }
 
         if (!this.validateCmd(cmd)) {
-            LogsGUI.printMessage("Command is invalid. Example: '!my_command'");
+            LogsGUI.printMessage("Tile command is invalid.");
+            LogsGUI.printMessage("Example: '!my_command'.");
             return result;
         }
 
