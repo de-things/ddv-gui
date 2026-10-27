@@ -35,18 +35,40 @@ function validateID(id) {
     let chars = /[`!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
     return !chars.test(id);
 }
+
+function isIPv6(ip) {
+    if (ip == "") return false;
+
+    try {
+        const url = new URL(`http://[${ip}]/`);
+        return url.hostname.startsWith("[") && url.hostname.endsWith("]");
+    } catch {
+        return false;
+    }
+}
+
+function isIPv4(ip) {
+    if (ip == "") return false;
+    
+    const seg = ip.trim().split(".");
+    if (seg.length !== 4) return false;
+
+    return seg.every(part =>
+        /^(0|[1-9]\d{0,2})$/.test(part) && Number(part) <= 255
+    );
+}
+
 /** Returns true whenever `ip` is valid. */
 function validateIP(ip) {
-    let ip_array = ip.split(".");
-    if (ip_array.length != 4) return false;
-
-    for (let i = 0; i < ip_array.length; i++) {
-        let seg = parseInt(ip_array[i]);
-        if (isNaN(seg)) return false;
-        if (seg > 255 || seg < 0) return false;
+    if (isIPv4(ip)) {
+        return 4;
     }
 
-    return true;
+    if (isIPv6(ip)) {
+        return 6;
+    }
+
+    return false;
 }
 
 /** Returns random hex string with a length of 4. */
@@ -57,19 +79,22 @@ function genRndStr4() {
 const server = http.createServer((req, res) => {
     if (req.method === "POST") {
         if (req.url == "/api") {
-            var body = [];
+            let body = [];
             req.on("data", chunk => body.push(chunk));
             req.on("end", () => {
-                var json = JSON.parse(Buffer.concat(body).toString());
-                if (!validateIP(json.ip)) {
+                let json = JSON.parse(Buffer.concat(body).toString());
+                let ip_type = validateIP(json.ip);
+                if (!ip_type) {
                     res.writeHead(403, "Forbidden");
                     res.end();
                     return;
                 }
 
-                fetch(`http://${json.ip}:80`, { 
+                let url = ip_type == 4 ? json.ip : `[${json.ip}]`;
+
+                fetch(`http://${url}/`, { 
                     method:     "POST", 
-                    body:       json.cmd,
+                    body:       json.enc_cmd,
                     cache:      "no-cache",
                     keepalive:  false,
                     signal:     AbortSignal.timeout(2000)
@@ -157,6 +182,7 @@ const server = http.createServer((req, res) => {
                             title: "NEW BTN",
                             ip: "",
                             cmd: "",
+                            secret: "",
                             color: "#444"
                         }
 

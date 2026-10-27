@@ -32,6 +32,7 @@ body {
     font-weight: 500;
     color: #fffd;
     user-select: none;
+    touch-action: none;
 }
 
 @keyframes wiggle {
@@ -214,7 +215,7 @@ input:focus {
     white-space: pre-line;
     gap: 0;
     font-family: "mononoki_bold";
-    background: linear-gradient(45deg,#0000, #0000, #fff1, #fff1, #0000);
+    background: linear-gradient(45deg,#0000, #0000, #ffffff10, #ffffff10, #0000);
 }
 #logs:empty::after {
     content: "Nothing to show...";

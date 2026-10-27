@@ -37,24 +37,25 @@ class NavbarGUI {
 
 class TileConfigGUI {
     static config_items = {
-        type: {
-            tile_0: {
-                tile_type_btn_title: {
-                    type: "text",
-                    text: "Type",
-                    backgroundColor: "#333"
-                },
-            },
-            tile_1: {
-                tile_type_btn: {
-                    type: "btn",
-                    input_to_tile: true,
-                    text: "A",
-                    on_click: () => { console.log("todo") }
-                },
-            }
-            
-        },
+        // different tile types are barely designed,
+        // so it's disabled for now
+        // type: {
+        //     tile_0: {
+        //         tile_type_btn_title: {
+        //             type: "text",
+        //             text: "Type",
+        //             backgroundColor: "#333"
+        //         },
+        //     },
+        //     tile_1: {
+        //         tile_type_btn: {
+        //             type: "btn",
+        //             input_to_tile: true,
+        //             text: "A",
+        //             on_click: () => { /** change tile type */ }
+        //         },
+        //     }
+        // },
         title: {
             tile_item: {
                 tile_title_input: {
@@ -84,7 +85,7 @@ class TileConfigGUI {
             tile_item: {
                 tile_ip_input: {
                     type: "input",
-                    placeholder: "DDV address (IP)",
+                    placeholder: "Address (IPv4/IPv6)",
                     on_submit: () => {
                         document.getElementById("tile_cmd_input").focus();
                     }
@@ -95,9 +96,20 @@ class TileConfigGUI {
             tile_item: {
                 tile_cmd_input: {
                     type: "input",
-                    placeholder: "DDV command (!cmd)",
+                    placeholder: "!cmd",
                     on_submit: () => {
-                        document.getElementById("tile_cmd_input").blur();
+                        document.getElementById("tile_secret_input").focus();
+                    }
+                },
+            }
+        },
+        secret: {
+            tile_item: {
+                tile_secret_input: {
+                    type: "input",
+                    placeholder: "Secret (private key)",
+                    on_submit: () => {
+                        document.getElementById("tile_secret_input").blur();
                         config_tile.scrollBy(0, config_tile.scrollHeight);
                     }
                 },
@@ -135,6 +147,7 @@ class TileConfigGUI {
 
         document.getElementById("tile_ip_input").value = tile_instance.ip;
         document.getElementById("tile_cmd_input").value = tile_instance.cmd;
+        document.getElementById("tile_secret_input").value = tile_instance.secret;
     }
 
     static saveSelectedTile() {
@@ -144,6 +157,7 @@ class TileConfigGUI {
             color: document.getElementById("tile_color_input").value,
             ip: document.getElementById("tile_ip_input").value,
             cmd: document.getElementById("tile_cmd_input").value,
+            secret: document.getElementById("tile_secret_input").value,
         };
 
         // sync data with a server
@@ -210,7 +224,6 @@ class TilesGUI {
         tile.style.backgroundColor = tile_data.color;
 
         let color = App.hexToRgb(tile_data.color);
-        console.log(tile_data.color, color);
         let brightness = Math.round(.001 * (299*color.r + 587*color.g + 114*color.b));
 
         // calc text color to make it readable for most tile colors
@@ -239,6 +252,7 @@ class TilesGUI {
                 this.is_hold = true;
             }, 500);
         }
+
         tile.onpointerleave = () => {
             clearTimeout(TilesGUI.tile_timeout_handler);
             setTimeout(() => {
@@ -323,7 +337,7 @@ class TilesGUI {
                 PresetsMgr.selected_preset.tiles.push(json);
                 let tile_id = PresetsMgr.selected_preset.tiles.length - 1;
                 TilesGUI.addTileNode(tile_id, json, () => {
-                    DDVManager.request(json.ip, json.cmd).then(ddv_res => {
+                    DDVMgr.request(json.ip, json.cmd, json.secret).then(ddv_res => {
                         if (ddv_res) {
                             LogsGUI.printResMessage(json.ip, ddv_res);
                         }
@@ -343,7 +357,7 @@ class TilesGUI {
         for (let i = page_info.start_index; i < offset; i++) {
             const tile_data = PresetsMgr.selected_preset.tiles[i];
             TilesGUI.addTileNode(i, tile_data, () => {
-                DDVManager.request(tile_data.ip, tile_data.cmd).then(ddv_res => {
+                DDVMgr.request(tile_data.ip, tile_data.cmd, tile_data.secret).then(ddv_res => {
                     if (ddv_res) {
                         LogsGUI.printResMessage(tile_data.ip, ddv_res);
                     }
@@ -383,6 +397,7 @@ class PresetsGUI {
         const preset = document.createElement("div");
         preset.classList.add("basic_item", "tile_btn");
         preset.innerHTML = preset_name;
+        preset.setAttribute("preset_id", preset_name); // id used to access preset's content via db 
 
         presets.insertBefore(preset, document.getElementById("add_preset_btn"));
 
@@ -411,19 +426,13 @@ class PresetsGUI {
                 this.is_hold = true;
             }, 500);
         }
-        preset.onpointerleave = () => {
-            clearTimeout(PresetsGUI.preset_timeout_handler);
-            setTimeout(() => {
-                PresetsGUI.is_hold = false;
-            }, 10);
-        }
 
         return preset;
     }
 
     static onPresetSelected(preset_node) {
         // update selected preset id
-        localStorage.setItem("preset_id", preset_node.innerHTML);
+        localStorage.setItem("preset_id", preset_node.getAttribute("preset_id"));
         PresetsMgr.loadSelectedPreset();
     }
 
@@ -684,7 +693,7 @@ class AppGUI {
         document.body.style.width = layout_state == 1 ? "calc(100vw - 2rem)" : "calc(100vw - 3rem)";
         document.body.style.height = layout_state == 1 ? "calc(100dvh - 3rem)" : "calc(100dvh - 2rem)";
         document.body.style.minHeight = layout_state == 1 ? "calc(100dvh - 3rem)" : "calc(100dvh - 2rem)";
-        document.documentElement.setAttribute("style", `--font-size: ${localStorage.getItem("font_size") / 10}rem`);
+        document.documentElement.setAttribute("style", `--font-size: ${.1 * localStorage.getItem("font_size")}rem`);
     }
 
     static showGridGUI(...elements) {
@@ -811,8 +820,8 @@ class StorageMgr {
         TilesGUI.updateGrid();
     };
 
-    static switchLayout() {
-        // true - vertical, false - horizontal
+    static switchLayoutState() {
+        // 1 - vertical, 0 - horizontal
         localStorage.setItem("layout_state", localStorage.getItem("layout_state") == 1 ? 0 : 1);
         AppConfigGUI.update();
         AppGUI.updateLayout();
@@ -1012,7 +1021,7 @@ class AppConfigGUI {
                     type: "btn",
                     input_to_tile: true,
                     text: "None",
-                    on_click: StorageMgr.switchLayout
+                    on_click: StorageMgr.switchLayoutState
                 },
             }
         },
@@ -1226,33 +1235,51 @@ class LogsGUI {
         logs.scrollBy(0, logs.scrollHeight);
     }
 }
+/** dethings device manager to work with ddv requests. */
+class DDVMgr {
+    static #isIPv6(ip) {
+        if (ip == "") return false;
 
-class DDVManager {
-    static validateIP(ip) {
-        let ip_array = ip.split(".");
-        if (ip_array.length != 4) return false;
-
-        for (let i = 0; i < ip_array.length; i++) {
-            let seg = parseInt(ip_array[i]);
-            if (isNaN(seg)) return false;
-            if (seg > 255 || seg < 0) return false;
+        try {
+            const url = new URL(`http://[${ip}]/`);
+            return url.hostname.startsWith("[") && url.hostname.endsWith("]");
+        } catch {
+            return false;
         }
+    }   
+    static #isIPv4(ip) {
+        if (ip == "") return false;
 
-        return true;
+        const seg = ip.trim().split(".");
+        if (seg.length !== 4) return false;
+
+        return seg.every(part =>
+            /^(0|[1-9]\d{0,2})$/.test(part) && Number(part) <= 255
+        );
+    }
+
+    static validateIP(ip) {
+        return this.#isIPv4(ip) || this.#isIPv6(ip);
     }
     static validateCmd(cmd) {
         return cmd.startsWith("!") && cmd.length > 1;
     }
+    /** Returns true if secret size is 32 bytes (requred for AES-256-GCM) */
+    static validateSecret(secret) {
+        return new TextEncoder().encode(secret).buffer.byteLength == 32
+    }
+
     /** Sends command request to a ddv. `ip` - dethings device ip address, `cmd` - !command to send. 
      * Returns device response as a plain text.
     */
-    static async request(ip, cmd) {
+    static async request(ip, cmd, secret) {
         let result;
         let failed = false;
 
         if (!this.validateIP(ip)) {
             LogsGUI.printMessage("Tile address (IP) is invalid.");
-            LogsGUI.printMessage("Example: '192.168.88.128'.");
+            LogsGUI.printMessage("IPv4 Example: '192.168.88.128'.");
+            LogsGUI.printMessage("IPv6 Example: '2001:db8::ff00:42:8329'.");
             LogsGUI.printMessage("Tip: Hold tile to edit it's data.");
             return result;
         }
@@ -1262,12 +1289,21 @@ class DDVManager {
             LogsGUI.printMessage("Example: '!my_command'.");
             return result;
         }
+        
+        if (!this.validateSecret(secret)) {
+            LogsGUI.printMessage("Tile private key (secret) is invalid.");
+            LogsGUI.printMessage("Expected: <32-byte string>.");
+            return result;
+        }
 
         LogsGUI.printReqMessage(ip, cmd);
 
+        let secret_buffer = CryptoMgr.toUint8Array(secret);
+        let enc_cmd = await CryptoMgr.encrypt(cmd, secret_buffer);
+
         let res = await fetch("/api", { 
             method: "POST",
-            body: JSON.stringify({ ip, cmd }),
+            body: JSON.stringify({ ip, enc_cmd }),
             headers: {
                 "Content-Type": "application/json"
             }
@@ -1277,12 +1313,69 @@ class DDVManager {
 
         if (!failed) {
             result = await res.text();
+            let dec_data = await CryptoMgr.decrypt(result, secret_buffer);
+            if (dec_data) result = dec_data;
         }
         else {
             LogsGUI.printErrMessage(ip, "No response");
         }
 
         return result;
+    }
+}
+
+class CryptoMgr {
+    static toUint8Array = str => (new TextEncoder()).encode(str);
+
+    static #toBase64(bytes) {
+        let result = "";
+        bytes.map(b => result += String.fromCharCode(b));
+        return btoa(result);
+    }
+
+    static #fromBase64 = base64 => Uint8Array.from(atob(base64), char => char.charCodeAt(0));
+
+    /** encrypts data using aes-256-gcm. */
+    static async encrypt(data, keyBytes) {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+
+        const secret = await crypto.subtle.importKey(
+            "raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]
+        );
+
+        const cipher_n_tag = new Uint8Array(await crypto.subtle.encrypt(
+            { name: "AES-GCM", iv, tagLength: 128 }, secret, this.toUint8Array(data)
+        ));
+
+        const result = new Uint8Array(iv.length + cipher_n_tag.length);
+        result.set(iv, 0);
+        result.set(cipher_n_tag, iv.length);
+
+        return this.#toBase64(result);
+    }
+
+    /** decrypts data using aes-256-gcm. */
+    static async decrypt(enc, keyBytes) {
+        const data = this.#fromBase64(enc);
+        const iv_len = 12;
+        const tag_size = 16; // 16 * 8 = 128bit gcm tag
+
+        if (data.length < iv_len + tag_size) {
+            return console.error("Cannot decrypt the data");
+        }
+
+        const iv = data.slice(0, iv_len); // iv slice
+        const cipher_n_tag = data.slice(iv_len); // cipher + tag slice
+
+        const secret = await crypto.subtle.importKey(
+            "raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]
+        );
+
+        const result = await crypto.subtle.decrypt(
+            { name: "AES-GCM", iv, tagLength: 128 }, secret, cipher_n_tag
+        );
+
+        return (new TextDecoder()).decode(result);
     }
 }
 
