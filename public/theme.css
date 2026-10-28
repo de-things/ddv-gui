@@ -217,34 +217,38 @@ input:focus {
     font-family: "mononoki_bold";
     background: linear-gradient(45deg,#0000, #0000, #ffffff10, #ffffff10, #0000);
 }
-#logs:empty::after {
-    content: "Nothing to show...";
-    height: 100%;
-    overflow: hidden;
-    animation: text-blink 1s ease-in-out infinite;
-}
-#presets:empty {
-    display: flex;
-}
-#presets:empty::after {
-    content: "Waiting for chunk data...";
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: .5;
-    animation: text-blink 1s ease-in-out infinite;
-}
 
-@keyframes text-blink {
+@keyframes text_blink {
     0% { opacity: .25; }
     50% { opacity: .5; }
     to { opacity: .25; }
 }
 
+#logs:empty::after {
+    content: "Terminal is on standby";
+    height: 100%;
+    overflow: hidden;
+    animation: text_blink 1s ease-in-out infinite;
+}
+#presets:empty {
+    display: flex;
+}
+#presets:empty::after {
+    content: "Access denied";
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    opacity: .5;
+}
+
 .error_impact {
     animation: error_impact 220ms ease-out forwards;
+}
+.error_impact_alt {
+    animation: error_impact_alt 220ms ease-out forwards;
 }
 @keyframes error_impact {
     from {
@@ -252,6 +256,14 @@ input:focus {
     }
     to {
         filter: invert(0%);
+    }
+}
+@keyframes error_impact_alt {
+    from {
+        transform: scale(1.05);
+    }
+    to {
+        transform: scale(1);
     }
 }
 .translateXp {
@@ -269,4 +281,46 @@ input:focus {
     from {
         transform: translateX(-.25rem);
     }
+}
+#area_A {
+    position: relative;
+}
+#qr_gui {
+    position: absolute;
+    background-color: #111;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}
+#qr_secret {
+    padding: min(4cqh, 4cqw);
+    background-color: white;
+    border-radius: min(4cqh, 4cqw);
+    width: min(50cqh, 50cqw);
+    aspect-ratio: 1;
+    display: flex;
+}
+#qr_secret_text {
+    color: #fff8;
+    text-align: center;
+    font-family: "mononoki_bold";
+    font-size: min(4cqh, 4cqw);
+}
+#qr_gui_close_btn {
+    width: 100%;
+    height: 4rem;
+    min-height: 4rem;
+    background-image: url("/assets/eye_crossed.svg");
+}
+#qr_secret_layout {
+    container-type: size;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    align-content: center;
+    gap: min(4cqh, 4cqw);
+}
+span {
+    overflow-wrap: anywhere;
 }
