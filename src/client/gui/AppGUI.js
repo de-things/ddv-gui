@@ -14,7 +14,7 @@ export class AppGUI {
         response_indicator.offsetWidth;
 
         if (negative) {
-            response_indicator.style.backgroundColor = "#F77";
+            response_indicator.style.backgroundColor = "#D45";
             response_indicator.style.backgroundImage = `url("/assets/cross.svg")`;
         }
         else {

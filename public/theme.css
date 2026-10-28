@@ -3,19 +3,19 @@
 }
 @font-face {
     font-family: "os_sbold";
-    src: url("/assets/os_sbold.woff2") format("woff2");
+    src: url("/assets/fonts/os_sbold.woff2") format("woff2");
     font-style: normal;
     font-weight: 400;
 }
 @font-face {
     font-family: "os_bold";
-    src: url("/assets/os_bold.woff2") format("woff2");
+    src: url("/assets/fonts/os_bold.woff2") format("woff2");
     font-style: normal;
     font-weight: 400;
 }
 @font-face {
     font-family: "mononoki_bold";
-    src: url("/assets/mononoki_bold.woff2") format("woff2");
+    src: url("/assets/fonts/mononoki_bold.woff2") format("woff2");
     font-style: normal;
     font-weight: 400;
 }

@@ -143,6 +143,7 @@ export class AppConfigGUI {
             tile_item: {
                 server_secret_input: {
                     type: "input",
+                    stretched: true,
                     private: true,
                     placeholder: "Access key (32-bytes)",
                     on_submit: () => {
@@ -167,7 +168,7 @@ export class AppConfigGUI {
                     input_to_tile: true,
                     text: "Sync",
                     outlined: true,
-                    color: "#FD6",
+                    color: "#FF5",
                     on_click: AppConfigMgr.syncServerSecretID
                 },
             }

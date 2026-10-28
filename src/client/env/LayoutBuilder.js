@@ -1,3 +1,5 @@
+import { App } from "./App.js"
+
 export class LayoutBuilder {
     /** creates elements inside `parent_element` for configuration GUIs
      * according to `reference_table`. */
@@ -20,6 +22,10 @@ export class LayoutBuilder {
                 for (let item_key in tile) {
                     let item = tile[item_key];
 
+                    if (item.stretched) {
+                        list_element_root.style.gridTemplateColumns = "1fr";
+                    }
+
                     if (item.type == "text") {
                         let text_element = document.createElement("div");
                         text_element.id = item_key;
@@ -40,7 +46,6 @@ export class LayoutBuilder {
                         input_element.id = item_key;
                         input_element.type = item.private ? "password" : "text";
                         input_element.placeholder = item.placeholder;
-                        list_element_root.style.gridTemplateColumns = "1fr";
                         tile_element.appendChild(input_element);
                         input_element.onkeyup = (ev) => {
                             if (item.on_submit && ev.key === "Enter" && !ev.isComposing) {
@@ -96,8 +101,10 @@ export class LayoutBuilder {
 
                         if (item.color) {
                             tile_element.style.backgroundColor = !item.outlined ? item.color : "transparent";
-                            tile_element.style.color = item.outlined ? item.color : "unset";
-                            tile_element.style.borderColor = item.color;
+                            tile_element.style.color = item.outlined ? item.color : App.getTextColor(item.color);
+                            if (item.outlined) {
+                                tile_element.style.borderColor = item.color;
+                            }
                         }
 
                         if (item.input_to_tile) {

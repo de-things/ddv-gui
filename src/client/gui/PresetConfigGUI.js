@@ -13,6 +13,7 @@ export class PresetConfigGUI {
             item: {
                 preset_name_input: {
                     type: "input",
+                    stretched: true,
                     placeholder: "Preset name",
                     on_submit: () => {
                         document.getElementById("preset_name_input").blur();
@@ -35,7 +36,7 @@ export class PresetConfigGUI {
                     text: "Remove",
                     input_to_tile: true,
                     outlined: true,
-                    color: "#f77",
+                    color: "#D45",
                     on_click: this.removeSelectedPreset
                 },
             }

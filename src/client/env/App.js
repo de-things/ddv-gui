@@ -54,12 +54,13 @@ export class App {
         return new TextEncoder().encode(secret).length === 32;
     }
 
-    /** #ff00ff => (255, 0, 255) */
+    /** #f0f / #ff00ff => (255, 0, 255) */
     static hexToRgb(hex) {
         let result;
 
         if (hex.length == 4) {
-            result = /^#?([a-f\d]{1})([a-f\d]{1})([a-f\d]{1})$/i.exec(hex);
+            result = /^#?([a-f\d])([a-f\d])([a-f\d])$/i.exec(hex);
+            result = result.map(b => b + b);
         }
         if (hex.length == 7) {
             result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -70,6 +71,17 @@ export class App {
             g: parseInt(result[2], 16),
             b: parseInt(result[3], 16)
         } : null;
+    }
+
+    /** returns text color (black or white) depending on `bg_color` brightness.
+     * useful to automatically select color for text over some colorful backgrounds.
+     * `bg_color` - Color value as a hex string.
+     */
+    static getTextColor(bg_color) {
+        let color = App.hexToRgb(bg_color);
+        let brightness = Math.round(.001 * (299*color.r + 587*color.g + 114*color.b));
+
+        return (brightness > 125) ? "#000C" : "#FFFC";
     }
 
     static init() {

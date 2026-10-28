@@ -14,7 +14,7 @@ export class LogsGUI {
         return date.toUTCString().substring(17, 25);
     }
     static printReqMessage(ip, message) {
-        this.#addSpan(`[${this.getTime()} REQ ${ip}]`, "#FD6");
+        this.#addSpan(`[${this.getTime()} REQ ${ip}]`, "#FF5");
         this.#addSpan(message);
     }
     static printResMessage(ip, message) {
@@ -22,7 +22,7 @@ export class LogsGUI {
         this.#addSpan(message.trim());
     }
     static printErrMessage(ip, message) {
-        this.#addSpan(`[${this.getTime()} ERR ${ip}]`, "#F77");
+        this.#addSpan(`[${this.getTime()} ERR ${ip}]`, "#F45");
         this.#addSpan(message);
     }
     static printMessage(message) {

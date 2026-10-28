@@ -11,7 +11,7 @@ import * as Layout from "../env/Layout.js"
 
 export class TilesGUI {
     static current_page = 0;
-    static selected_tile_id = 0;
+    static selected_tile_index = 0;
     static selected_tile; // html element of select tile
     static selected_tile_element;
     static tile_timeout_handler;
@@ -50,17 +50,14 @@ export class TilesGUI {
         };
     }
 
-    static addTileNode(id, tile_data, on_click) {
+    static addTileNode(index, tile_data, on_click) {
         const tile = document.createElement("div");
         tile.classList.add("tile", "tile_btn");
         tile.innerHTML = tile_data.title;
         tile.style.backgroundColor = tile_data.color;
 
-        let color = App.hexToRgb(tile_data.color);
-        let brightness = Math.round(.001 * (299*color.r + 587*color.g + 114*color.b));
-
         // calc text color to make it readable for most tile colors
-        tile.style.color = (brightness > 125) ? "black" : "white";
+        tile.style.color = App.getTextColor(tile_data.color);
 
         Layout.tiles.insertBefore(tile, document.getElementById("add_tile_btn"));
 
@@ -70,11 +67,11 @@ export class TilesGUI {
         }
 
         tile.onpointerdown = () => {
-            AppGUI.hideGUI(Layout.presets, Layout.config_app, Layout.config_tile);
+            AppGUI.hideGUI(Layout.presets, Layout.config_app, Layout.config_tile, Layout.qr_gui);
             AppGUI.showGUI(Layout.logs);
 
             this.tile_timeout_handler = setTimeout(() => {
-                this.selected_tile_id = id;
+                this.selected_tile_index = index;
                 TileConfigGUI.update();
                 AnimationMgr.stop(TilesGUI.selected_tile_element, "wiggle");
                 TilesGUI.selected_tile_element = tile;
