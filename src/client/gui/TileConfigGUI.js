@@ -76,6 +76,7 @@ export class TileConfigGUI {
             tile_item: {
                 tile_secret_input: {
                     type: "input",
+                    private: true,
                     placeholder: "Private key (32-bytes)",
                     on_submit: () => {
                         document.getElementById("tile_secret_input").blur();
