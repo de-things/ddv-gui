@@ -113,7 +113,7 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
                         let json = JSON.parse(data);
 
                         let tile_data = { // create new tile instance
-                            title: "NEW BTN",
+                            title: "NEW TILE",
                             ip: "",
                             cmd: "",
                             secret: "",

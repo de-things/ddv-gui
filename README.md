@@ -28,9 +28,9 @@ You can enter web interface locally using address from terminal logs. For defaul
 https://localhost:1984
 ```
 
-After entering a web interface you need to gain server access and fetch cluster data. To do so, you need to open web interface settings (gear button) and in `Private key` field specify server secret located in `config.json` under `secret` variable. This private key was randomly generated upon file creation.
+After entering a web interface you need to gain server access and fetch cluster data. To do so, you need to open web interface settings (gear button) and in `Access key` field specify secret located in `config.json` under `secret` variable. This private key was randomly generated upon configuration file creation and must be used in client<>server communication for security reasons.
 
-After specifying a private key click (tap) "Sync" button to confirm changes. Web interface should fetch server data and if valid private key was specified server will respond with it's presets data.
+After specifying a private key click (tap) "Sync" button to confirm changes. Web interface should fetch server data and if valid private key was specified server will respond with it's presets data. By default you will see empty presets tab with a '+' button.
 
 If private key is invalid, presets tab will show "Access denied" message.
 
