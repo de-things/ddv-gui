@@ -41,9 +41,7 @@ export class CryptoMgr {
         const iv_len = 12;
         const tag_size = 16; // 16 * 8 = 128bit gcm tag
 
-        if (data.length < iv_len + tag_size) {
-            return;
-        }
+        if (data.length < iv_len + tag_size) return;
 
         const iv = data.slice(0, iv_len); // iv slice
         const cipher_n_tag = data.slice(iv_len); // cipher + tag slice

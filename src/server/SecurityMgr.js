@@ -5,6 +5,8 @@ import * as ConfigMgr from "./ConfigMgr.js";
  *  `data` - string data to encrypt;
 */
 export function encrypt(data) {
+    if (typeof data !== "string") return;
+
     const iv = crypto.randomBytes(12);
     const secret_buffer = Buffer.from(ConfigMgr.secret(), "utf8");
 
@@ -25,13 +27,13 @@ export function encrypt(data) {
  * `enc_base64` - encrypted data as a base64 string.
 */
 export function decrypt(enc_base64) {
+    if (typeof enc_base64 !== "string") return;
+
     const data = Buffer.from(enc_base64, "base64");
     const iv_len = 12;
     const tag_len = 16;
 
-    if (data.length < iv_len + tag_len) {
-        return false;
-    }
+    if (data.length < iv_len + tag_len) return;
 
     const iv = data.subarray(0, iv_len);
     const cipher_n_tag = data.subarray(iv_len);
@@ -53,14 +55,12 @@ export function decrypt(enc_base64) {
 
         return dec_bytes.toString("utf8");
     }
-    catch {
-        return false;
-    }
+    catch { }
 }
 
 /** Returns true if `name` does not contain special symbols. */
 export function validatePresetName(name) {
-    if (typeof name !== "string" || name == "") return false;
+    if (typeof name !== "string" || name == "") return;
 
     let chars = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
     return !chars.test(name);
@@ -73,7 +73,7 @@ function isIPv6(ip) {
         const url = new URL(`http://[${ip}]/`);
         return url.hostname.startsWith("[") && url.hostname.endsWith("]");
     } catch {
-        return false;
+        return;
     }
 }
 
@@ -97,8 +97,6 @@ export function validateIP(ip) {
     if (isIPv6(ip)) {
         return 6;
     }
-
-    return false;
 }
 
 /** Generates random hex string. */
