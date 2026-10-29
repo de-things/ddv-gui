@@ -8,7 +8,7 @@ An important step deploying this project into a router is to use distinct memory
 
 Server-side is written in [nodejs](https://nodejs.org/), so install it. Also you need to install `openssl` cli tool on your linux machine.
 
-After install go to project's root directory and run in terminal:
+After installing `nodejs` and `openssl` go to project's root directory and run in terminal:
 
 ```sh
 chmod +x ./install.sh && ./install.sh -4 # for IPv4 install
