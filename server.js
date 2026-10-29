@@ -10,8 +10,7 @@ const MIME_TYPES = {
     ".css"  : "text/css",
     ".js"   : "text/javascript",
     ".svg"  : "image/svg+xml",
-    ".woff2": "font/woff2",
-    ".json" : "application/json",
+    ".woff2": "font/woff2"
 };
 
 ConfigMgr.init();
