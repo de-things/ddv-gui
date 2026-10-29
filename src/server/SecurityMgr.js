@@ -60,14 +60,14 @@ export function decrypt(enc_base64) {
 
 /** Returns true if `name` does not contain special symbols. */
 export function validatePresetName(name) {
-    if (!name || name.toString() == "") return false;
+    if (typeof name !== "string" || name == "") return false;
 
     let chars = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
     return !chars.test(name);
 }
 
 function isIPv6(ip) {
-    if (ip == "") return false;
+    if (typeof ip !== "string") return;
 
     try {
         const url = new URL(`http://[${ip}]/`);
@@ -78,10 +78,10 @@ function isIPv6(ip) {
 }
 
 function isIPv4(ip) {
-    if (ip == "") return false;
+    if (typeof ip !== "string") return;
     
     const seg = ip.trim().split(".");
-    if (seg.length !== 4) return false;
+    if (seg.length !== 4) return;
 
     return seg.every(part =>
         /^(0|[1-9]\d{0,2})$/.test(part) && Number(part) <= 255

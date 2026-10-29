@@ -19,6 +19,11 @@ ConfigMgr.init();
 // true if `value` is JSON object
 const isJsonObject = value => value !== null && typeof value === "object" && !Array.isArray(value);
 
+const writeForbidden = (res) => res.writeHead(403).end();
+const writeIntError = res => res.writeHead(500).end();
+const writeNotFound = res => res.writeHead(404).end();
+const writeTeapot = res => res.writeHead(418).end();
+
 // main server to handle backend
 https.createServer(ConfigMgr.credentials(), (req, res) => {
     if (req.method === "POST") {
@@ -31,33 +36,34 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
 
             if (BUFFER.byteLength > ConfigMgr.request_max_bytes()) { // decline requests above config limit
                 console.log(`Received a request [${req.url}] with a size of [${BUFFER.byteLength}] bytes... and was declined!`);
-                res.writeHead(400, "Too heavy request"); res.end(); return;
+                return writeTeapot(res);
             }
 
             const ENC_BASE64 = BUFFER.toString();
             const DEC_DATA = SecurityMgr.decrypt(ENC_BASE64);
 
-            if (!DEC_DATA) {
-                res.writeHead(403, "Forbidden"); res.end(); return;
+            if (!DEC_DATA) return writeForbidden(res);
+
+            /** request json object (may be empty if no json was sent) */
+            let req_json = {};
+
+            try {
+                req_json = JSON.parse(DEC_DATA);
             }
+            catch {}
 
             // URL HANDLERS 
             //
             if (req.url == "/api") {
-                let json = JSON.parse(DEC_DATA);
-                let ip_type = SecurityMgr.validateIP(json.ip); // type 4, 6
+                let ip_type = SecurityMgr.validateIP(req_json.ip); // type 4, 6
 
-                if (!ip_type) {
-                    res.writeHead(403, "Forbidden");
-                    res.end();
-                    return;
-                }
+                if (!ip_type) return writeForbidden(res);
 
-                let url = ip_type == 4 ? json.ip : `[${json.ip}]`;
+                let url = ip_type == 4 ? req_json.ip : `[${req_json.ip}]`;
 
                 fetch(`http://${url}/`, { 
                     method:     "POST", 
-                    body:       json.enc_cmd,
+                    body:       req_json.enc_cmd,
                     cache:      "no-cache",
                     keepalive:  false,
                     signal:     AbortSignal.timeout(2000)
@@ -66,46 +72,33 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
                         res.end(data);
                     }); 
                 }).catch(e => { 
-                    res.writeHead(400, "No ddv response");
-                    res.end();
+                    writeTeapot(res);
                 });
             }
             else if (req.url == "/get_preset_data") {
                 if (!SecurityMgr.validatePresetName(DEC_DATA)) {
-                    res.writeHead(403, "Forbidden"); res.end();
-                    return;
+                    return writeForbidden(res);
                 }
                 
-                fs.readFile(path.join(ConfigMgr.db_path(), `${DEC_DATA}.json`), { encoding: "utf-8" }, (err, _data) => {
-                    if (!err) {
-                        let res_enc_base64 = SecurityMgr.encrypt(_data);
-                        res.end(res_enc_base64);
-                    }
-                    else {
-                        res.writeHead(404, "Not Found");
-                        res.end();
-                    }
+                fs.readFile(path.join(ConfigMgr.db_path(), `${DEC_DATA}.json`), { encoding: "utf-8" }, (err, data) => {
+                    if (err) return writeNotFound(res);
+                    res.end(SecurityMgr.encrypt(data));
                 });
             }
             else if (req.url == "/get_presets") {
-                fs.readdir(ConfigMgr.db_path(), (err, _data) => {
-                    if (!err) {
-                        res.end(SecurityMgr.encrypt(
-                            JSON.stringify({ 
-                                data: _data.map(file => file.replace(".json", "")) 
-                            })
-                        ));
-                    }
-                    else {
-                        res.writeHead(400, "Something went wrong with the server!");
-                    }
-                    res.end();
+                fs.readdir(ConfigMgr.db_path(), (err, data) => {
+                    if (err) return writeIntError();
+
+                    res.end(SecurityMgr.encrypt(
+                        JSON.stringify({ 
+                            data: data.map(file => path.parse(file).name) 
+                        })
+                    ));
                 });
             }
             else if (req.url == "/add_tile") {
                 if (!SecurityMgr.validatePresetName(DEC_DATA)) {
-                    res.writeHead(403, "Forbidden"); res.end();
-                    return;
+                    return writeForbidden(res);
                 }
 
                 let preset_path = path.join(ConfigMgr.db_path(), `${DEC_DATA}.json`);
@@ -113,7 +106,14 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
                 if (fs.existsSync(preset_path)) { // check if specified preset file exist
                     fs.readFile(preset_path, { encoding: "utf-8" }, (err, data) => {
                         // get preset data
-                        let json = JSON.parse(data);
+                        let json;
+
+                        try {
+                            json = JSON.parse(data)
+                        }
+                        catch {
+                            return writeIntError(res);
+                        }
 
                         let tile_data = { // create new tile instance
                             title: "NEW TILE",
@@ -127,11 +127,11 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
                         json.tiles.push(tile_data);
 
                         // update preset file
-                        fs.writeFileSync(preset_path, JSON.stringify(json));
-
-                        // 
-                        res.writeHead(200);
-                        res.end(SecurityMgr.encrypt(JSON.stringify(tile_data)));
+                        fs.writeFile(preset_path, JSON.stringify(json), (err) => {
+                            if (err) return writeIntError(res);
+                            // respond with a created tile data
+                            res.end(SecurityMgr.encrypt(JSON.stringify(tile_data)));
+                        });
                     });
                 }
             }
@@ -144,90 +144,60 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
 
                 if (fs.existsSync(file_path)) {
                     // such preset file already exist, so respond with an error
-                    res.writeHead(400, "Something went wrong"); res.end();
-                    return;
+                    return writeIntError();
                 }
 
                 // write new preset file into specified chunk
-                fs.writeFileSync(file_path, JSON.stringify({ tiles: [] }));
-
-                // respond with a new preset data
-                res.writeHead(200, "OK");
-                res.end(SecurityMgr.encrypt(JSON.stringify(preset_data)));
+                fs.writeFile(file_path, JSON.stringify({ tiles: [] }), (err) => {
+                    if (err) return writeIntError(res);
+                    // respond with a new preset data
+                    res.end(SecurityMgr.encrypt(JSON.stringify(preset_data)));
+                });
             }
             else if (req.url == "/remove_preset") {
                 if (!SecurityMgr.validatePresetName(DEC_DATA)) {
-                    res.writeHead(403, "Forbidden"); res.end();
-                    return;
+                    return writeForbidden(res);
                 }
 
                 fs.rm(path.join(ConfigMgr.db_path(), `${DEC_DATA}.json`), (err) => {
-                    if (!err) {
-                        res.writeHead(200, "OK");
-                        res.end();
-                    }
-                    else {
-                        res.writeHead(400, "Something went wrong");
-                        res.end();
-                    }
+                    if (err) return writeIntError();
+                    res.end();
                 });
             }
-            else if (req.url == "/rename_preset") {
-                let json = JSON.parse(DEC_DATA);
-                
-                if (!SecurityMgr.validatePresetName(json.new_preset_id)) {
-                    res.writeHead(403, "Forbidden"); res.end();
-                    return;
+            else if (req.url == "/rename_preset") {                
+                if (!SecurityMgr.validatePresetName(req_json.new_preset_id)) {
+                    return writeForbidden(res);
                 }
 
-                let old_name = path.join(ConfigMgr.db_path(), `${json.old_preset_id}.json`);
-                let new_name = path.join(ConfigMgr.db_path(), `${json.new_preset_id}.json`);
+                let old_name = path.join(ConfigMgr.db_path(), `${req_json.old_preset_id}.json`);
+                let new_name = path.join(ConfigMgr.db_path(), `${req_json.new_preset_id}.json`);
 
                 if (old_name == new_name) {
-                    res.writeHead(200, "OK");
-                    res.end();
-                    return;
+                    return res.end();
                 }
 
                 if (fs.existsSync(new_name)) {
-                    res.writeHead(403, "Preset with such name is already exist");
-                    res.end();
-                    return;
+                    return writeForbidden(res);
                 }
 
                 fs.rename(old_name, new_name, (err) => {
-                    if (!err) {
-                        res.writeHead(200, "OK");
-                        res.end();
-                    }
-                    else {
-                        res.writeHead(400, "Something went wrong");
-                        res.end();
-                    }
+                    if (err) return writeForbidden();
+                    res.end();
                 });
             }
             else if (req.url == "/save_preset_data") {
-                let json = JSON.parse(DEC_DATA);
-
-                if (!SecurityMgr.validatePresetName(json.preset_id) || !isJsonObject(json.data)) {
-                    res.writeHead(403, "Forbidden"); res.end();
-                    return;
+                if (!SecurityMgr.validatePresetName(req_json.preset_id) || !isJsonObject(req_json.data)) {
+                    return writeForbidden(res);
                 }
 
-                fs.writeFile(path.join(ConfigMgr.db_path(), `${json.preset_id}.json`), JSON.stringify(json.data), { encoding: "utf-8" }, (err, _data) => {
-                    if (!err) {
-                        res.writeHead(200, "OK");
-                        res.end();
-                    }
-                    else {
-                        res.writeHead(400, "Something went wrong");
-                        res.end();
-                    }
+                fs.writeFile(path.join(ConfigMgr.db_path(), `${req_json.preset_id}.json`), JSON.stringify(req_json.data), { encoding: "utf-8" }, (err) => {
+                    if (err) return writeIntError();
+                    res.end();
                 });
             }
         });
 
-        return;
+        return; // end of POST request condition
     }
 
     // try to send back a file from 'public/'
@@ -236,19 +206,13 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
     file_path = file_path.replaceAll("..", ""); // prevent from breaking file system
 
     fs.readFile(path.join(ConfigMgr.public_dir(), file_path), (err, data) => {
-        if (!err) {
-            const offset = file_path.lastIndexOf(".");
-            const index = offset == -1 ? "" : file_path.substr(offset);
+        if (err) return writeNotFound(res);
 
-            const mimetype = MIME_TYPES[index] ?? "text/plain";
+        const MIMETYPE = MIME_TYPES[path.parse(file_path).ext];
+        if (!MIMETYPE) return writeForbidden(res);
 
-            res.setHeader("Content-type" , mimetype);
-            res.end(data);
-        }
-        else {
-            res.writeHead(404, `Not Found ${file_path}`);
-            res.end();
-        }
+        res.setHeader("Content-type" , MIMETYPE);
+        res.end(data);
     });
 }).listen(ConfigMgr.port(), "0.0.0.0", () => {
     console.log("Server is running.");
