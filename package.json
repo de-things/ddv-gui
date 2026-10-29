@@ -2,5 +2,8 @@
   "name": "ddv-gui",
   "version": "1.0.0",
   "main": "server.js",
-  "type":"module"
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
 }

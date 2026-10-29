@@ -12,7 +12,7 @@ export var request_max_bytes = () => config.request_max_bytes;
 export var credentials = () => {
     return {
         key: fs.readFileSync(config.key_path),
-        cert: fs.readFileSync(config.cert_path),
+        cert: fs.readFileSync(config.crt_path),
     }
 }
 
@@ -21,8 +21,8 @@ const CONFIG_DEFAULTS = {
     db_path: "",
     request_max_bytes: 102400,
     secret: crypto.randomBytes(16).toString("hex"),
-    key_path: "./cert/debug-key.pem",
-    cert_path: "./cert/debug-cert.pem",
+    key_path: "./cert/server.key",
+    crt_path: "./cert/server.crt"
 }
 
 /** initializes config data */

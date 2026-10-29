@@ -16,6 +16,9 @@ const MIME_TYPES = {
 
 ConfigMgr.init();
 
+// true if `value` is JSON object
+const isJsonObject = value => value !== null && typeof value === "object" && !Array.isArray(value);
+
 // main server to handle backend
 https.createServer(ConfigMgr.credentials(), (req, res) => {
     if (req.method === "POST") {
@@ -206,7 +209,7 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
             else if (req.url == "/save_preset_data") {
                 let json = JSON.parse(DEC_DATA);
 
-                if (!SecurityMgr.validatePresetName(json.preset_id)) {
+                if (!SecurityMgr.validatePresetName(json.preset_id) || !isJsonObject(json.data)) {
                     res.writeHead(403, "Forbidden"); res.end();
                     return;
                 }
@@ -248,5 +251,6 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
         }
     });
 }).listen(ConfigMgr.port(), "0.0.0.0", () => {
-    console.log(`Server is running on: https://localhost:${ConfigMgr.port()}`);
+    console.log("Server is running.");
+    console.log(`Localhost: https://localhost:${ConfigMgr.port()}`);
 });

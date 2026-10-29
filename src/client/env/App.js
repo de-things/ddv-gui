@@ -39,7 +39,7 @@ export class App {
     }
 
     static validateCmd(cmd) {
-        return cmd.trim().length > 1;
+        return cmd.trim().length >= 1;
     }
 
     static validatePresetName(name) {

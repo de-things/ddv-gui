@@ -1,88 +1,72 @@
 ## Description
 
-This web GUI is designed to be deployed to routers, but you can pick any other supported platform. For example in android you can use [termux](https://termux.dev/) to run server in the background and then access GUI layout via `localhost:port` URL in browser.
+This web GUI is designed to be deployed to routers, but you can pick any other supported platform. For example in Android you can use [termux](https://termux.dev/) to run server in the background and then access GUI layout via browser.
 
-An important step deploying this project into the router is to use distinct memory card (flash drive) for a database (cluster) to protect router's infrastructure from memory overflow.
+An important step deploying this project into a router is to use distinct memory card (flash drive) for a cluster (database) to protect router's infrastructure from memory overflow.
 
-## Install
+## Install (Linux)
 
-Server-side is written in [nodejs](https://nodejs.org/). You need to install it first.
+Server-side is written in [nodejs](https://nodejs.org/), so install it. Also you need to install `openssl` cli tool on your linux machine.
 
-After install run server by a following command:
-
-```sh
-node server.js
-```
-
-Server will create file called `config.json` where you need to specify `db_path` variable. After setting it up run the same command again:
+After install go to project's root directory and run this in terminal:
 
 ```sh
-node server.js
+chmod +x ./install.sh && ./install.sh -4 # for IPv4 install
+chmod +x ./install.sh && ./install.sh -6 # for IPv6 install
 ```
 
-Now server is listening on port specified in config and using `db_path` as a cluster directory.
-
-You can enter web interface locally using address from terminal logs. For default configuration it should be:
+Script should create self-signed SSL certificates and allow you to start a server. So to start a server from now and on use:
 
 ```sh
-https://localhost:1984
+./start.sh
 ```
 
-After entering a web interface you need to gain server access and fetch cluster data. To do so, you need to open web interface settings (gear button) and in `Access key` field specify secret located in `config.json` under `secret` variable. This private key was randomly generated upon configuration file creation and must be used in client<>server communication for security reasons.
+During first run server will create file called `config.json` and ask you to define `db_path`. This is a route to your local cluster to store users data. Define any path you want and run `./start.sh` again.
 
-After specifying a private key click (tap) "Sync" button to confirm changes. Web interface should fetch server data and if valid private key was specified server will respond with it's presets data. By default you will see empty presets tab with a '+' button.
+After entering a web interface you need to gain server access and fetch cluster data. In order to do so, in web interface go to settings (gear button) and in `Access key` field specify secret value located in `config.json` under `secret` variable. That private key was randomly generated and wanted to be used as an encryption provider for further communication.
 
-If private key is invalid, presets tab will show "Access denied" message.
+After specifying an `Access key` press `Sync` button to apply changes. Web interface should fetch server data and if an `Access key` was fine server will respond with presets data.
 
-From now and on you can start working on GUI presets in web interface by clicking on '+' button.
+If `Access key` is invalid, presets tab show `Access denied` message, otherwise you may see presets list with a `+` button. It will be empty if you're on clean install though.
+
+From now and on you can start working on GUI presets by pressing a `+` button.
+
+## About GUI presets
+
+Each preset can be modified by holding it.
+
+Each tile in preset can be modified by holding it as well. Inproper values in tile fields will drop tip messages into GUI logs.
 
 ## SSL certificate
 
 Since this project relies on encrypted client<>server communication, HTTPS is **required**.
 
-By default server uses *debug-* key/cert pair, but if you plan to deploy this project into your environment you need to worry about generating your own certificates for security reasons. You can use `openssl` cli tool to generate appropriate files.
+By default server uses `server.*` key/crt pair, but if you plan to deploy this project into your environment you need to worry about getting your own **trusted** SSL certificate. For such problem I can recommend you to buy a domain and then reverse-proxy traffic to it. `nginx` or `caddy` may help with it. You can check more info over the internet.
 
-You can specify path to certificate files in `config.json` under `key_path` and `cert_path` variables.
+If you are poor (like me) you can use install self-signed certificate to *trust* server IP on specified devices.
 
-## About presets
+### So, you are poor (Android example)
 
-Presets are basically a pre-built layout for web interface with buttons (tiles) to control de:things devices. They stored on server-side and can be fetched/modified at any time.
+Since default `server.*` certificate was self-signed during `./install.sh` you need to manually *trust* (install) it on device you want to use as an entry point to a web interface.
 
-Each tile in preset can be modified by holding it, so follow in-app instructions to setup it properly.
+On Android device go to: Settings -> Security & Privacy -> More -> Encryption & credentials -> Install a certificate...
 
-## Contribute
+In project's `/cert` directory you can find `trusted.crt` file which is the one you need to install on your device. If you don't see `/cert` directory - run `./install.sh` again and check terminal output for issues.
 
-### Linux
+After `trusted.crt` was installed it's time to test it.
 
-Run these commands before start editing a code:
+If you use Chrome browser it should automatically update trusted certificates right after you install them.
 
-```sh
-sudo npm install --global esbuild
-chmod +x ./rebuild.sh
-```
+For Firefox browser there are additional steps...
 
-From now and on to rebuild the project, use:
+In Firefox browser go to: Settings -> About Firefox -> Tap Firefox logo until developer menu will be unlocked -> Go back and open `Secret Settings` -> Enable check `Use third party CA certificates`.
 
-```sh
-./rebuild.sh
-```
+Go to server URL and no SSL issues should be listed.
 
-A script should re-bundle client's code and start a server with related `config.json` attributes.
+Keep in mind installed certificate may cause some apps stop working on your device, since it violates android security concepts. So to return workflow you can uninstall certificate by clicking on the same tab you installed it: `Trusted/User credentials` -> `Uninstall`.
 
-You need to run `./rebuild.sh` every time you modify javascript code. There is no live-update feature.
+### Important finale
 
-### Windows
+If your server IP change for some reason, your trusted certificate will turn into a pumpkin. To avoid such inconvenience - **make your server IP static**.
 
-For Windows users procedure mostly the same, some commands just different.
-
-Install dependencies:
-
-```sh
-npm install --global esbuild
-```
-
-In powershell run each time after editing a javascript code:
-
-```sh
-./rebuild.ps1
-```
+That's all about SSL.
