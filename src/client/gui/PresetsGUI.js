@@ -21,14 +21,14 @@ export class PresetsGUI {
         preset.onclick = (ev) => {
             if (this.is_hold) return; // do not proceed onclick event of a preset since it has invoked "onhold" event
             on_click();
-        }
 
-        preset.onpointerdown = () => {
             if (AppGUI.isGUIOpened(Layout.config_preset)) {
                 AppGUI.hideGUI(Layout.config_preset);
                 AppGUI.showGridGUI(Layout.tiles);
             }
+        }
 
+        preset.onpointerdown = () => {
             this.preset_timeout_handler = setTimeout(() => {
                 this.selected_preset_name = preset_name;
                 PresetConfigGUI.update();
