@@ -78,6 +78,4 @@ That's all about SSL.
 
 ## Overview
 
-<img src=./misc/1.png>
-<br />
-<img src=./misc/2.png>
+<img src=./misc/overview.png>
