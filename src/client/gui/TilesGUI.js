@@ -64,13 +64,13 @@ export class TilesGUI {
         tile.onclick = () => {
             if (this.is_hold) return; // do not proceed onclick event of a tile since it has invoked "onhold" event
             on_click();
+
+            AppGUI.hideGUI(Layout.presets, Layout.config_app, Layout.config_tile, Layout.qr_gui);
+            AppGUI.showGUI(Layout.logs);
         }
 
         tile.onpointerdown = () => {
-            AppGUI.hideGUI(Layout.presets, Layout.config_app, Layout.config_tile, Layout.qr_gui);
-            AppGUI.showGUI(Layout.logs);
-
-            this.tile_timeout_handler = setTimeout(() => {
+                this.tile_timeout_handler = setTimeout(() => {
                 this.selected_tile_index = index;
                 TileConfigGUI.update();
                 AnimationMgr.stop(TilesGUI.selected_tile_element, "wiggle");
@@ -81,13 +81,6 @@ export class TilesGUI {
 
                 this.is_hold = true;
             }, 500);
-        }
-
-        tile.onpointerleave = () => {
-            clearTimeout(TilesGUI.tile_timeout_handler);
-            setTimeout(() => {
-                TilesGUI.is_hold = false;
-            }, 10);
         }
 
         return tile;
