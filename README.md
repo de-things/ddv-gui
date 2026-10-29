@@ -75,3 +75,9 @@ Keep in mind installed certificate may cause some apps stop working on your devi
 If your server IP change for some reason, your trusted certificate will turn into a pumpkin. To avoid such inconvenience - **make your server IP static**.
 
 That's all about SSL.
+
+## Overview
+
+<img src=./misc/1.png>
+<br />
+<img src=./misc/2.png>
