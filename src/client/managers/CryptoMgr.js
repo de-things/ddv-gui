@@ -10,7 +10,8 @@ export class CryptoMgr {
      * `secret` - 32-bytes key as a string.
      */
     static async encrypt(data, secret_str) {
-        if (!secret_str || secret_str == "") return;
+        if (typeof data !== "string") return;
+        if (typeof secret_str !== "string") return;
         
         const secret_bytes = this.#toUint8Array(secret_str);
         const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -32,11 +33,8 @@ export class CryptoMgr {
 
     /** decrypts data using aes-256-gcm. */
     static async decrypt(enc_base64, secret_str) {
-        if (!secret_str || secret_str == "") return;
-        
-        if (!enc_base64) {
-            return false;
-        }
+        if (typeof secret_str !== "string") return;
+        if (typeof enc_base64 !== "string") return;
 
         const secret_bytes = this.#toUint8Array(secret_str);
         const data = this.#fromBase64(enc_base64);
@@ -44,7 +42,7 @@ export class CryptoMgr {
         const tag_size = 16; // 16 * 8 = 128bit gcm tag
 
         if (data.length < iv_len + tag_size) {
-            return false;
+            return;
         }
 
         const iv = data.slice(0, iv_len); // iv slice
