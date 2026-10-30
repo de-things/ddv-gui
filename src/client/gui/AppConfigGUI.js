@@ -4,6 +4,7 @@ import { AppConfigMgr } from "../managers/AppConfigMgr.js"
 import { AppGUI } from "./AppGUI.js"
 import { QRGUI } from "./QRGUI.js"
 import * as Layout from "../env/Layout.js";
+import { App } from "../env/App.js"
 
 export class AppConfigGUI {
     static config_items = {
@@ -198,7 +199,7 @@ export class AppConfigGUI {
            font_size_text.innerHTML = "L";
         }
         
-        document.getElementById("server_secret_input").value = localStorage.getItem("server_secret");
+        document.getElementById("server_secret_input").value = App.server_secret();
     }
 
     static tryOpenQRGUI() {
@@ -209,7 +210,7 @@ export class AppConfigGUI {
             AnimationMgr.play(server_secret_input, "error_impact");
             return;
         }
-        else if (!localStorage.getItem("server_secret") || server_secret_input.value != localStorage.getItem("server_secret")) {
+        else if (!App.server_secret() || server_secret_input.value != App.server_secret()) {
             AnimationMgr.stop(server_secret_sync_btn.parentElement, "error_impact_alt");
             AnimationMgr.play(server_secret_sync_btn.parentElement, "error_impact_alt");
             return;

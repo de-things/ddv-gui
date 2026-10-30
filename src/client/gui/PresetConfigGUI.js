@@ -1,10 +1,10 @@
+import { DelibAPI } from "../libs/delib/index.js"
 import { AppGUI } from "./AppGUI.js"
 import { TilesGUI } from "./TilesGUI.js"
 import { PresetsGUI } from "./PresetsGUI.js"
 import { AnimationMgr } from "../managers/AnimationMgr.js"
 import { PresetsMgr } from "../managers/PresetsMgr.js"
 import { App } from "../env/App.js"
-import { CryptoMgr } from "../managers/CryptoMgr.js"
 import * as Layout from "../env/Layout.js"
 
 export class PresetConfigGUI {
@@ -54,18 +54,14 @@ export class PresetConfigGUI {
             return;
         }
 
-        fetch(`/rename_preset`, {
-            method: "POST",
-            body:   await CryptoMgr.encrypt(
-                        JSON.stringify({
-                            old_preset_id: localStorage.getItem("preset_id"),
-                            new_preset_id: preset_name_input.value
-                        }), 
-                        localStorage.getItem("server_secret")
-                    )
-        })
-        .then(res => {
-            if (res.ok) {
+        DelibAPI.request("/rename_preset", App.server_secret(), 
+            JSON.stringify({
+                old_preset_id: localStorage.getItem("preset_id"),
+                new_preset_id: preset_name_input.value
+            }))
+            .then(res => {
+                if (!res) return AppGUI.showResponseIndicator(true);
+
                 AppGUI.showResponseIndicator();
                 localStorage.setItem("preset_id", preset_name_input.value);
 
@@ -75,18 +71,13 @@ export class PresetConfigGUI {
                 PresetsMgr.fetchPresets();
                 PresetsMgr.loadSelectedPreset();
             }
-            else {
-                AppGUI.showResponseIndicator(true);
-            }
-        });
+        );
     }
     static async removeSelectedPreset() {
-        fetch(`/remove_preset`, {
-            method: "POST", 
-            body: await CryptoMgr.encrypt(localStorage.getItem("preset_id"), localStorage.getItem("server_secret"))
-        })
-        .then(res => { 
-            if (res.ok) {
+        DelibAPI.request("/remove_preset", App.server_secret(), localStorage.getItem("preset_id"))
+            .then(res => {
+                if (!res) return AppGUI.showResponseIndicator(true);
+
                 if (localStorage.getItem("preset_id") == PresetsGUI.selected_preset_name) {
                     localStorage.removeItem("preset_id");
                     TilesGUI.clearTiles();
@@ -101,7 +92,6 @@ export class PresetConfigGUI {
 
                 AppGUI.showResponseIndicator();
                 PresetsMgr.fetchPresets();
-            }
-        });
+            });
     }
 }

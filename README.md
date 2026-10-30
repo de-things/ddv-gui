@@ -6,9 +6,15 @@ An important step deploying this project into a router is to use distinct memory
 
 ## Install (Linux)
 
-Server-side is written in [nodejs](https://nodejs.org/), so install it. Also you need to install `openssl` cli tool on your linux machine.
+First of all you need to install [git](https://git-scm.com/), [nodejs](https://nodejs.org/) and `openssl` cli tool.
 
-After installing `nodejs` and `openssl` go to project's root directory and run in terminal:
+The next step is to clone repo using:
+
+```
+git clone --recurse-submodules https://github.com/de-things/de-gui.git
+```
+
+Go to clonned directory and run:
 
 ```sh
 chmod +x ./install.sh && ./install.sh -4 # for IPv4 install

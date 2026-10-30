@@ -27,7 +27,6 @@ const CONFIG_DEFAULTS = {
 
 /** initializes config data */
 export function init() {
-    console.clear();
     console.log("Validating config data...");
     
     // create config.json if does not exist

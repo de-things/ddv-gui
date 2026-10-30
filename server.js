@@ -62,13 +62,13 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
 
                 fetch(`http://${url}/`, { 
                     method:     "POST", 
-                    body:       req_json.enc_cmd,
+                    body:       req_json.enc_data,
                     cache:      "no-cache",
                     keepalive:  false,
                     signal:     AbortSignal.timeout(2000)
                 }).then(raw => { 
                     raw.text().then(data => {
-                        res.end(data);
+                        res.end(SecurityMgr.encrypt(data));
                     }); 
                 }).catch(e => { 
                     writeTeapot(res);
@@ -86,7 +86,7 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
             }
             else if (req.url == "/get_presets") {
                 fs.readdir(ConfigMgr.db_path(), (err, data) => {
-                    if (err) return writeIntError();
+                    if (err) return writeIntError(res);
 
                     res.end(SecurityMgr.encrypt(
                         JSON.stringify({ 
@@ -143,7 +143,7 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
 
                 if (fs.existsSync(file_path)) {
                     // such preset file already exist, so respond with an error
-                    return writeIntError();
+                    return writeIntError(res);
                 }
 
                 // write new preset file into specified chunk
@@ -159,7 +159,7 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
                 }
 
                 fs.rm(path.join(ConfigMgr.db_path(), `${DEC_DATA}.json`), (err) => {
-                    if (err) return writeIntError();
+                    if (err) return writeIntError(res);
                     res.end();
                 });
             }
@@ -180,7 +180,7 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
                 }
 
                 fs.rename(old_name, new_name, (err) => {
-                    if (err) return writeForbidden();
+                    if (err) return writeForbidden(res);
                     res.end();
                 });
             }
@@ -190,7 +190,7 @@ https.createServer(ConfigMgr.credentials(), (req, res) => {
                 }
 
                 fs.writeFile(path.join(ConfigMgr.db_path(), `${req_json.preset_id}.json`), JSON.stringify(req_json.data), { encoding: "utf-8" }, (err) => {
-                    if (err) return writeIntError();
+                    if (err) return writeIntError(res);
                     res.end();
                 });
             }

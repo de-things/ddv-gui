@@ -1,58 +1,47 @@
-
+import { DelibAPI } from "../libs/delib/index.js"
 import { LogsGUI } from "../gui/LogsGUI.js"
-import { CryptoMgr } from "./CryptoMgr.js"
 import { App } from "../env/App.js"
 
 /** dethings device manager to work with ddv requests. */
 export class DDVMgr {
-    /** Sends command request to a ddv. `ip` - dethings device ip address, `cmd` - !command to send. 
-     * Returns device response as a plain text.
-    */
-    static async request(ip, cmd, secret) {
+    static async request(ip, secret_str, data) {
         let result;
         let failed = false;
 
-        if (!App.validateIP(ip)) {
+        if (!DelibAPI.validateIP(ip)) {
             LogsGUI.printMessage("Specified IP address is invalid.");
             LogsGUI.printMessage("IPv4 Example: '192.168.88.128'.");
             LogsGUI.printMessage("IPv6 Example: '2001:db8::ff00:42:8329'.");
             LogsGUI.printMessage("Tip: Hold tile to edit it's data.");
-            return result;
+            return;
         }
 
-        if (!App.validateCmd(cmd)) {
-            LogsGUI.printMessage("Specified command is invalid.");
+        if (!DelibAPI.validateData(data)) {
+            LogsGUI.printMessage("Specified data is invalid.");
             LogsGUI.printMessage("Expected: <string>.");
-            return result;
+            return;
         }
         
-        if (!App.validateSecret(secret)) {
+        if (!DelibAPI.validateSecret(secret_str)) {
             LogsGUI.printMessage("Tile private key (secret) is invalid.");
             LogsGUI.printMessage("Expected: <32-byte string>.");
-            return result;
+            console.log(secret_str, new TextEncoder().encode(secret_str).length)
+            return;
         }
 
-        LogsGUI.printReqMessage(ip, cmd);
+        LogsGUI.printReqMessage(ip, data);
 
-        let enc_cmd = await CryptoMgr.encrypt(cmd, secret);
+        let enc_data = await DelibAPI.encrypt(data, secret_str);
 
-        let res = await fetch("/api", { 
-            method: "POST",
-            body: await CryptoMgr.encrypt(JSON.stringify({ ip, enc_cmd }), localStorage.getItem("server_secret")),
-        })
-        .catch(e => { console.error(e); failed = true; });
+        // send request to a backend /api with device data
+        let response = await DelibAPI.request(`/api`, 
+            App.server_secret(), JSON.stringify({ ip, enc_data }))
 
-        failed = !res.ok;
-
-        if (!failed) {
-            result = await res.text();
-            let dec_data = await CryptoMgr.decrypt(result, secret);
-            if (dec_data) result = dec_data;
-        }
-        else {
+        if (!response) {
             LogsGUI.printErrMessage(ip, "No response");
+            return;
         }
 
-        return result;
+        return await DelibAPI.decrypt(response, secret_str);
     }
 }

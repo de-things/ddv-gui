@@ -1,5 +1,4 @@
 import "./src/client/env/Layout.js";
-import "./src/client/managers/CryptoMgr.js";
 import "./src/client/managers/PresetsMgr.js";
 import "./src/client/managers/AppConfigMgr.js";
 import "./src/client/managers/AnimationMgr.js";
@@ -16,4 +15,5 @@ import "./src/client/gui/LogsGUI.js";
 import "./src/client/env/LayoutBuilder.js";
 import "./src/client/env/App.js";
 import "./src/client/libs/qrcode.min.js"
+import "./src/client/libs/delib/index.js";
 import "./src/client/init.js"

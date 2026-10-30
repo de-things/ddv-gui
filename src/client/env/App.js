@@ -12,6 +12,8 @@ import { PresetConfigGUI } from "../gui/PresetConfigGUI.js"
 import * as Layout from "./Layout.js"
 
 export class App {
+    static server_secret = () => localStorage.getItem("server_secret");
+    
     static #isIPv6(ip) {
         if (ip == "") return false;
 

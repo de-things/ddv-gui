@@ -4,9 +4,9 @@ import { LogsGUI } from "./LogsGUI.js"
 import { TileConfigGUI } from "./TileConfigGUI.js"
 import { PresetsMgr } from "../managers/PresetsMgr.js"
 import { AnimationMgr } from "../managers/AnimationMgr.js"
-import { CryptoMgr } from "../managers/CryptoMgr.js"
 import { DDVMgr } from "../managers/DDVMgr.js"
 import { App } from "../env/App.js"
+import { DelibAPI } from "../libs/delib/index.js"
 import * as Layout from "../env/Layout.js"
 
 export class TilesGUI {
@@ -148,29 +148,24 @@ export class TilesGUI {
 
         // add new tile to a preset by clicking add tile btn
         add_tile_btn.onclick = async () => {
-            fetch(`/add_tile`, {
-                method: "POST", 
-                body: await CryptoMgr.encrypt(localStorage.getItem("preset_id"), localStorage.getItem("server_secret"))
-            })
-            .then(res => { if (res.ok) return res.text(); })
-            .then(async enc_base64 => {
-                let dec_data = await CryptoMgr.decrypt(enc_base64, localStorage.getItem("server_secret"));
-                if (!dec_data) return;
-                
-                let json = JSON.parse(dec_data);
+            DelibAPI.request("/add_tile", App.server_secret(), localStorage.getItem("preset_id"))
+                .then(res => {
+                    if (!res) return;
 
-                PresetsMgr.selected_preset.tiles.push(json);
-                let tile_id = PresetsMgr.selected_preset.tiles.length - 1;
-                TilesGUI.addTileNode(tile_id, json, () => {
-                    DDVMgr.request(json.ip, json.cmd, json.secret).then(ddv_res => {
-                        if (ddv_res) {
-                            LogsGUI.printResMessage(json.ip, ddv_res);
-                        }
+                    let json = JSON.parse(res);
+
+                    PresetsMgr.selected_preset.tiles.push(json);
+                    let tile_id = PresetsMgr.selected_preset.tiles.length - 1;
+                    TilesGUI.addTileNode(tile_id, json, () => {
+                        DDVMgr.request(json.ip, json.secret, json.cmd).then(ddv_res => {
+                            if (ddv_res) {
+                                LogsGUI.printResMessage(json.ip, ddv_res);
+                            }
+                        });
                     });
+                    this.drawPage();
+                    AppGUI.showResponseIndicator();
                 });
-                this.drawPage();
-                AppGUI.showResponseIndicator();
-            });
         }
 
         let offset = page_info.start_index + page_info.tiles_size;
@@ -182,7 +177,7 @@ export class TilesGUI {
         for (let i = page_info.start_index; i < offset; i++) {
             const tile_data = PresetsMgr.selected_preset.tiles[i];
             TilesGUI.addTileNode(i, tile_data, () => {
-                DDVMgr.request(tile_data.ip, tile_data.cmd, tile_data.secret).then(ddv_res => {
+                DDVMgr.request(tile_data.ip, tile_data.secret, tile_data.cmd).then(ddv_res => {
                     if (ddv_res) {
                         LogsGUI.printResMessage(tile_data.ip, ddv_res);
                     }
