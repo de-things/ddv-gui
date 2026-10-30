@@ -1,0 +1,3 @@
+[submodule "src/client/libs/delib"]
+	path = src/client/libs/delib
+	url = https://github.com/de-things/delib-web.git
