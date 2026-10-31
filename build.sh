@@ -1,5 +1,6 @@
-
 arch=$(uname -m)
+
+echo "Building a standalone executable for $arch architecture."
 
 ./bundle.sh
 
@@ -16,6 +17,3 @@ mv server bin/$arch/server
 cp -r public bin/$arch/public
 cp -r cert bin/$arch/cert
 cp config.json bin/$arch/config.json
-
-arch=$(uname -m)
-echo "This executable is suitable for for $arch architecture."

@@ -82,18 +82,31 @@ If your server IP change for some reason, your trusted certificate will turn int
 
 That's all about SSL.
 
-## Deploying to prefered environment
+## Deploying to prefered environment (Router example)
 
-In order to deploy this web-interface in router you need to build it.
+The best way to deploy is to build the project into a standalone executable. I'll describe steps for deploying it into a router.
 
-First of all, check router's architecture and container's OS you plan to run this project. For example, my MikroTik router run on ARM64 and use Alpine Linux as a container environment.
+First of all, check router's architecture and container's OS you plan to run this project on. For example, my MikroTik router operate on ARM64 architecture with Alpine Linux as a container environment.
 
-So in order to build this project for my router's setup we will:
+So in order to build this project for such router you need to find some *computer* with a described setup and then run this project there in debug mode following steps above.
 
-1. Find any computer with the same architecture as my router (Android smartphone is enough, since aarch64 == arm64);
-2. Run project in debug mode at least once following the guide above;
-3. Run `./build.sh` to generate output files to be deployed in router;
-4. Clone these files in router and run `./server` there.
+After successful run and setting things up, you can build the project on *computer* using:
+
+```sh
+./build.sh
+```
+
+This script bundle javascript into a standalone executable file and clone everything server need to work with into a destination folder.
+
+For setup above build files will be located in `bin/arm64`of project's root directory. All you need to do after is to clone this `bin/arm64` files to the router and run an executable inside:
+
+```sh
+./server
+```
+
+It should work the same way as in dev environment you run it using `./start.sh` script.
+
+In a case of using built version of the project, you don't need `nodejs` or other tools being installed on router (or any other device) in this case.
 
 ## Overview
 
