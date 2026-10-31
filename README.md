@@ -4,8 +4,8 @@ This web GUI is designed to be deployed to routers, but you can pick any other s
 
 An important step deploying this project into a router is to use distinct memory card (flash drive) for a cluster (database) to protect router's infrastructure from memory overflow.
 
-## Install (Linux)
-
+## Running in debug mode (Linux)
+ 
 First of all you need to install [git](https://git-scm.com/), [nodejs](https://nodejs.org/) and `openssl` cli tool.
 
 The next step is to clone repo using:
@@ -17,13 +17,13 @@ git clone --recurse-submodules https://github.com/de-things/de-gui.git
 Go to clonned directory and run:
 
 ```sh
-chmod +x ./install.sh && ./install.sh -4 # for IPv4 install
+chmod +x ./install.sh && ./install.sh
 ```
 
-or
+After script downloaded dependencies, you need to create debug SSL certificate in order to run this server in debug mode. To do it, run:
 
 ```sh
-chmod +x ./install.sh && ./install.sh -6 # for IPv6 install
+./mkcert.sh 192.168.0.1 # replace with server's public IP
 ```
 
 Script should create self-signed SSL certificates and allow you to start a server. So to start a server from now and on use:
@@ -81,6 +81,19 @@ Keep in mind installed certificate may cause some apps stop working on your devi
 If your server IP change for some reason, your trusted certificate will turn into a pumpkin. To avoid such inconvenience - **make your server IP static**.
 
 That's all about SSL.
+
+## Deploying to prefered environment
+
+In order to deploy this web-interface in router you need to build it.
+
+First of all, check router's architecture and container's OS you plan to run this project. For example, my MikroTik router run on ARM64 and use Alpine Linux as a container environment.
+
+So in order to build this project for my router's setup we will:
+
+1. Find any computer with the same architecture as my router (Android smartphone is enough, since aarch64 == arm64);
+2. Run project in debug mode at least once following the guide above;
+3. Run `./build.sh` to generate output files to be deployed in router;
+4. Clone these files in router and run `./server` there.
 
 ## Overview
 

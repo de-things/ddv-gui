@@ -1,9 +1,14 @@
-# create a dir to store certificates data
-mkdir -p -- "./cert"
+if [[ -z "${1:-}" ]]; then
+  echo "You need to specify public server IP to create certificate." >&2
+  echo "Example: ./mkcert.sh 192.168.0.1" >&2
+  exit 1
+fi
 
-# get public ip address
-# (ipv4 by default, but first script flag set to '-6' will set it to ipv6)
-ip=$(ip -o ${1:-"-4"} addr show scope global | awk '{sub(/\/.*/, "", $4); print $4}')
+# create a dir to store certificate
+rm -rf cert
+mkdir cert
+
+ip=$1
 
 # gen A private key
 ca_key=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072)

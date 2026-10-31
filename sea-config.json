@@ -1,0 +1,5 @@
+{
+  "main": "server.tmp.js",
+  "output": "server",
+  "mainFormat": "module"
+}
