@@ -2,7 +2,7 @@
 
 This web GUI is designed to be deployed to routers, but you can pick any other supported platform. For example in Android you can use [termux](https://termux.dev/) to run server in the background and then access GUI layout via browser.
 
-## Running in debug mode (Linux)
+## Running in debug mode (Linux/Android)
  
 First of all you need to install [git](https://git-scm.com/), [nodejs](https://nodejs.org/) and `openssl` cli tool.
 
