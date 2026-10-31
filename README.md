@@ -6,7 +6,7 @@ This web GUI is designed to be deployed to routers, but you can pick any other s
  
 First of all you need to install [git](https://git-scm.com/), [nodejs](https://nodejs.org/) and `openssl` cli tool.
 
-The next step is to clone repo using:
+The next step is to clone repo using (for termux use it's root directory to clone the repo there):
 
 ```
 git clone --recurse-submodules https://github.com/de-things/de-gui.git
@@ -18,7 +18,7 @@ Go to clonned directory and run:
 chmod +x ./install.sh && ./install.sh
 ```
 
-After script downloaded dependencies, you need to create debug SSL certificate in order to run this server in debug mode. To do it, run:
+After install finished, you need to create debug SSL certificate in order to run this server in debug mode. To do it, run:
 
 ```sh
 ./mkcert.sh 192.168.0.1 # replace with server's public IP
@@ -82,29 +82,29 @@ That's all about SSL.
 
 ## Deploying to prefered environment (Router example)
 
-The best way to deploy is to build the project into a standalone executable. I'll describe steps for deploying it into a router.
+The best way to deploy the project is to build it into a standalone executable. It prevents destination device from owning dev packages like `nodejs`, `git` and etc. Just a server file and few configs.
+
+I'll describe steps for deploying it into a router, but other platforms are the same.
 
 First of all, check router's architecture and container's OS you plan to run this project on. For example, my MikroTik router operate on ARM64 architecture with Alpine Linux as a container environment.
 
-So in order to build this project for such router you need to find some *computer* with a described setup and then run this project there in debug mode following steps above.
+So in order to build this project for such router you need to find some *computer* with a described setup and then run this project there in debug mode following steps above (creating `config.json` / ssl certificate / etc).
 
-After successful run and setting things up, you can build the project on *computer* using:
+After successful run and setting things up, you can build the project on *computer* running:
 
 ```sh
 ./build.sh
 ```
 
-This script bundle javascript into a standalone executable file and clone everything server need to work with into a destination folder.
+The script bundle javascript into a standalone executable file and clone everything server need to work with into a destination folder.
 
-For setup above build files will be located in `bin/arm64`of project's root directory. All you need to do after is to clone this `bin/arm64` files to the router and run an executable inside:
+For setup above build files will be located at `bin/arm64` of project's root directory. All you need to do after is to clone this `bin/arm64` files to the router and run an executable inside:
 
 ```sh
 ./server
 ```
 
-It should work the same way as in dev environment you run it using `./start.sh` script.
-
-In a case of using built version of the project, you don't need `nodejs` or other tools being installed on router (or any other device) in this case.
+It should work the same way as in dev environment when you start a server using `./start.sh` script.
 
 ## Overview
 
